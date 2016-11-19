@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csvtodb>
+	<csvfile>FiBu-Profin-Bewegungsdaten.csv</csvfile>
+	<delimeter>;</delimeter>
+	<database>
+		<!-- 
+			dbtypes: mysql, (future release ... mssql, postgrsql )
+			datbase: select database of database server
+			port: port number of database server
+			user: user of database
+			password: password for user of database	
+		-->
+		<dbtype>mysql</dbtype>
+		<database_name>uebungsdatenbank</database_name>
+		<host>localhost</host>
+		<port>3306</port>
+		<user>root</user>
+		
+		<password>montag</password>
+	</database>
+	<!-- Tabel to map -->
+	<table>rechnung</table>
+	
+	<convert-cvs-dates-to-iso-date>false Noch nicht implementiert</convert-cvs-dates-to-iso-date>
+	<!-- Mapping from csv fields to table columns -->
+	<map-csv-fields-to-db>
+	
+		<field-mapping>
+			<csv-field>Datum</csv-field>
+			<table-column>datum</table-column>
+		</field-mapping>
+		<field-mapping>
+			<csv-field>Konto1</csv-field>
+			<table-column>konto1</table-column>
+		</field-mapping>
+		<field-mapping>
+			<csv-field>Konto2</csv-field>
+			<table-column>konto2</table-column>
+		</field-mapping>
+		
+		<field-mapping>
+			<csv-field>Betrag</csv-field>
+			<table-column>betrag</table-column>
+		</field-mapping>
+		
+		
+		<field-mapping>
+			<csv-field>Buchungstext</csv-field>
+			<table-column>buchungstext</table-column>
+		</field-mapping>
+		
+		
+	</map-csv-fields-to-db>
+</csvtodb>
