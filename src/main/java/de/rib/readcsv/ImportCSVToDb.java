@@ -2,6 +2,10 @@ package de.rib.readcsv;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -14,9 +18,26 @@ import de.rib.datehelper.ConvertDateToIso;
 public class ImportCSVToDb {
 
 	public static void main(String[] args) {
+		String pathOfConfigFile =args[0];;
+		boolean configFileExists=false;
+		/* If first argument is an path to config file then use it. In other case use default file*/
+		if(args.length!=0){
+			Path path = Paths.get(pathOfConfigFile);
+			System.out.println("Übergebener Pfad: " + pathOfConfigFile);
+			configFileExists= Files.exists(path,new LinkOption[]{ LinkOption.NOFOLLOW_LINKS});
+			System.out.println("Config File Exists: " + configFileExists);
+		}
 		// Als erstes wird ein Objekt vom Typ ConfigurationCvsToDB erstellt.
 		ConfigurationCvsToDB cvsDBConfig = new ConfigurationCvsToDB();
-		cvsDBConfig.readConfigFile("csvtodb_config.xml");
+		if(configFileExists==true){
+			System.out.println("Lese Config Datei: "+pathOfConfigFile);
+			cvsDBConfig.readConfigFile(pathOfConfigFile);
+		}
+		else{
+			System.out.println("Lese Standard Config Datei");
+			cvsDBConfig.readConfigFile("csvtodb_config.xml");
+		}
+		
 		Connection con = cvsDBConfig.getConnectionToDb();
 		// TODO Auto-generated method stub
 		try {
