@@ -27,9 +27,12 @@ public class ConfigurationCvsToDB {
 	private String password;
 	private String table;
 	private char delimeter;
+	private boolean dateIsISODate=false;
 	private ArrayList<FieldCVSToDb> mapList = new ArrayList<FieldCVSToDb>();
 	private Connection conToDb = null;
-
+	private Document document=null;
+	
+	
 	public String getCvsfile() {
 		return cvsfile;
 	}
@@ -123,6 +126,16 @@ public class ConfigurationCvsToDB {
 	public void setDelimeter(char delimeter) {
 		this.delimeter = delimeter;
 	}
+	
+	
+
+	public boolean isDateIsISODate() {
+		return dateIsISODate;
+	}
+
+	public void setDateIsISODate(boolean dateIsISODate) {
+		this.dateIsISODate = dateIsISODate;
+	}
 
 	public boolean readConfigFile(String pathXMLConfigFile) {
 		try {
@@ -130,7 +143,7 @@ public class ConfigurationCvsToDB {
 			
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
-			Document document = documentBuilder.parse(xmlFile);
+			document = documentBuilder.parse(xmlFile);
 
 			/* Redundanter Code, Methode implementieren, die den redundaten Code neutralisiert*/
 			/* Lese Element csvfile */
@@ -138,6 +151,28 @@ public class ConfigurationCvsToDB {
 			Element elementCsvFile = (Element) nodePathCsvFile.item(0);
 			String pathCSVFile = elementCsvFile.getFirstChild().getTextContent();
 			this.setCvsfile(pathCSVFile);
+			
+			/*
+			 * Dieser Versuch redundaten Kode zu eliminieren hat leider nicht funktioniert.
+			 * this.setCvsfile(this.getValueOfXMLNode("cvsfile"));
+			 */
+			
+			
+			/* Lese Element convert-cvs-dates-to-iso-date */
+			NodeList nodeDateToIso = document.getElementsByTagName("convert-cvs-dates-to-iso-date");
+			Element elementIsoDate = (Element) nodeDateToIso.item(0);
+			String flagDateToIso = elementIsoDate.getFirstChild().getTextContent();
+			if(flagDateToIso!=null ){
+				if(flagDateToIso.equals("true"))
+					this.setDateIsISODate(true);
+				else{
+					this.setDateIsISODate(false);
+				}
+			}
+			
+			
+			
+			
 			
 			/* Lese Element delimeter*/
 			NodeList nodeDelimeterCsvFile = document.getElementsByTagName("delimeter");
@@ -245,6 +280,17 @@ public class ConfigurationCvsToDB {
 		}
 		return null;
 
+	}
+	
+	private String getValueOfXMLNode(String xmlNode){
+		
+		/* Die Methode funktioniert noch nicht */
+		
+		
+		NodeList nodeOfTag = document.getElementsByTagName(xmlNode);
+		Element elementOfTag = (Element) nodeOfTag.item(0);
+		String valueOfElement = elementOfTag.getFirstChild().getTextContent();
+		return valueOfElement;
 	}
 
 }

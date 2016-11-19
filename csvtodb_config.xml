@@ -3,28 +3,31 @@
 	<csvfile>FiBu-Profin-Bewegungsdaten.csv</csvfile>
 	<delimeter>;</delimeter>
 	<database>
-		<!-- 
-			dbtypes: mysql, (future release ... mssql, postgrsql )
-			datbase: select database of database server
-			port: port number of database server
-			user: user of database
-			password: password for user of database	
-		-->
+		<!-- dbtypes: mysql, (future release ... mssql, postgrsql ) datbase: select 
+			database of database server port: port number of database server user: user 
+			of database password: password for user of database -->
 		<dbtype>mysql</dbtype>
 		<database_name>uebungsdatenbank</database_name>
 		<host>localhost</host>
 		<port>3306</port>
 		<user>root</user>
-		
+
 		<password>montag</password>
 	</database>
 	<!-- Tabel to map -->
 	<table>rechnung</table>
+	<!--
+	 Columns of time date expects the following date format for date values 
+	in the cvs file: dd-mm-yyyy
 	
-	<convert-cvs-dates-to-iso-date>false Noch nicht implementiert</convert-cvs-dates-to-iso-date>
+	If the database needs an format of iso 8601 yyyy-mm-dd you can set the value of tag: convert-cvs-dates-to-iso-date  
+	to true. The default value is false.	
+	-->
+	<convert-cvs-dates-to-iso-date>true</convert-cvs-dates-to-iso-date>
+
 	<!-- Mapping from csv fields to table columns -->
 	<map-csv-fields-to-db>
-	
+
 		<field-mapping>
 			<csv-field>Datum</csv-field>
 			<table-column>datum</table-column>
@@ -37,18 +40,18 @@
 			<csv-field>Konto2</csv-field>
 			<table-column>konto2</table-column>
 		</field-mapping>
-		
+
 		<field-mapping>
 			<csv-field>Betrag</csv-field>
 			<table-column>betrag</table-column>
 		</field-mapping>
-		
-		
+
+
 		<field-mapping>
 			<csv-field>Buchungstext</csv-field>
 			<table-column>buchungstext</table-column>
 		</field-mapping>
-		
-		
+
+
 	</map-csv-fields-to-db>
 </csvtodb>
