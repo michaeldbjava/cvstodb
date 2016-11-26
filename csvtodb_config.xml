@@ -29,7 +29,7 @@
 	<map-csv-fields-to-db>
 
 		<field-mapping>
-			<csv-field>Datum</csv-field>
+			<csv-field>datum</csv-field>
 			<table-column>datum</table-column>
 		</field-mapping>
 		<field-mapping>

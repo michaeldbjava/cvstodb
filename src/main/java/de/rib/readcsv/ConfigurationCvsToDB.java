@@ -283,11 +283,11 @@ public class ConfigurationCvsToDB {
 	}
 	
 	private String getValueOfXMLNode(String xmlNode){
-		
+		String xmlNodeValue=xmlNode;
 		/* Die Methode funktioniert noch nicht */
 		
 		
-		NodeList nodeOfTag = document.getElementsByTagName(xmlNode);
+		NodeList nodeOfTag = document.getElementsByTagName(xmlNodeValue);
 		Element elementOfTag = (Element) nodeOfTag.item(0);
 		String valueOfElement = elementOfTag.getFirstChild().getTextContent();
 		return valueOfElement;

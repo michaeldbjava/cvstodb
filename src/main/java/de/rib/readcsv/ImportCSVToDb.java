@@ -1,7 +1,9 @@
 package de.rib.readcsv;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -11,6 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import de.rib.datehelper.ConvertDateToIso;
@@ -51,16 +54,19 @@ public class ImportCSVToDb {
 			ArrayList<FieldCVSToDb> listOfFields = cvsDBConfig.getMapList();
 
 			// Datum;Konto1;Konto2;Betrag;RechnungsNr;GutschriftKennz;FaelligkeitDatum;Kostenstelle;Buchungstext;BelegNr;VerdichtungsKz
-			Reader in = new FileReader(cvsDBConfig.getCvsfile());
+			//Reader in = new FileReader(cvsDBConfig.getCvsfile());
+			File file = new File(cvsDBConfig.getCvsfile());
 			/*
 			 * Iterable<CSVRecord> records = CSVFormat.newFormat(';')
 			 * .withHeader("Datum", "Konto1", "Konto2", "Betrag", "RechnungsNr",
 			 * "GutschriftKennz", "FaelligkeitDatum", "Kostenstelle",
 			 * "Buchungstext", "BelegNr", "VerdichtungsKz") .parse(in);
 			 */
-
-			Iterable<CSVRecord> records = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withFirstRecordAsHeader()
-					.parse(in);
+			CSVFormat csvFormat = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withRecordSeparator("\n").withFirstRecordAsHeader();
+			//Iterable<CSVRecord> records = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withFirstRecordAsHeader().parse(in);
+			
+			 CSVParser parser = CSVParser.parse(file,StandardCharsets.UTF_8, csvFormat);
+			 Iterable<CSVRecord> records = parser.getRecords();
 			String columnList = "(";
 			for (int i = 0; i < listOfFields.size(); i++) {
 				FieldCVSToDb fCvsDb = listOfFields.get(i);
@@ -127,6 +133,7 @@ public class ImportCSVToDb {
 			}
 			statement.executeBatch();
 			con.commit();
+			
 			statement.close();
 			/*
 			 * Reader in = new
