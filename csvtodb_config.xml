@@ -3,7 +3,10 @@
 	<csvfile>FiBu-Profin-Bewegungsdaten.csv</csvfile>
 	<delimeter>;</delimeter>
 	<database>
-		<!-- dbtypes: mysql, (future release ... mssql, postgrsql ) datbase: select 
+		<!-- dbtypes: 
+			+ mysql, 
+			+ sqlite, if you use sqlite then you need only database name and not host, port and user
+		 (future release ... mssql, postgrsql ) datbase: select 
 			database of database server port: port number of database server user: user 
 			of database password: password for user of database -->
 		<dbtype>mysql</dbtype>

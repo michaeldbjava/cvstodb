@@ -17,7 +17,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ConfigurationCvsToDB {
-	
+
 	private String cvsfile;
 	private String localhost;
 	private String database;
@@ -27,12 +27,11 @@ public class ConfigurationCvsToDB {
 	private String password;
 	private String table;
 	private char delimeter;
-	private boolean dateIsISODate=false;
+	private boolean dateIsISODate = false;
 	private ArrayList<FieldCVSToDb> mapList = new ArrayList<FieldCVSToDb>();
 	private Connection conToDb = null;
-	private Document document=null;
-	
-	
+	private Document document = null;
+
 	public String getCvsfile() {
 		return cvsfile;
 	}
@@ -40,7 +39,7 @@ public class ConfigurationCvsToDB {
 	public void setCvsfile(String cvsfile) {
 		this.cvsfile = cvsfile;
 	}
-	
+
 	public String getLocalhost() {
 		return localhost;
 	}
@@ -48,7 +47,6 @@ public class ConfigurationCvsToDB {
 	public void setLocalhost(String localhost) {
 		this.localhost = localhost;
 	}
-
 
 	public String getDatabase() {
 		return database;
@@ -114,11 +112,6 @@ public class ConfigurationCvsToDB {
 		this.table = table;
 	}
 
-	
-	
-	
-	
-
 	public char getDelimeter() {
 		return delimeter;
 	}
@@ -126,8 +119,6 @@ public class ConfigurationCvsToDB {
 	public void setDelimeter(char delimeter) {
 		this.delimeter = delimeter;
 	}
-	
-	
 
 	public boolean isDateIsISODate() {
 		return dateIsISODate;
@@ -140,52 +131,49 @@ public class ConfigurationCvsToDB {
 	public boolean readConfigFile(String pathXMLConfigFile) {
 		try {
 			File xmlFile = new File(pathXMLConfigFile);
-			
+
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
 			document = documentBuilder.parse(xmlFile);
 
-			/* Redundanter Code, Methode implementieren, die den redundaten Code neutralisiert*/
+			/*
+			 * Redundanter Code, Methode implementieren, die den redundaten Code
+			 * neutralisiert
+			 */
 			/* Lese Element csvfile */
 			NodeList nodePathCsvFile = document.getElementsByTagName("csvfile");
 			Element elementCsvFile = (Element) nodePathCsvFile.item(0);
 			String pathCSVFile = elementCsvFile.getFirstChild().getTextContent();
 			this.setCvsfile(pathCSVFile);
-			
+
 			/*
-			 * Dieser Versuch redundaten Kode zu eliminieren hat leider nicht funktioniert.
-			 * this.setCvsfile(this.getValueOfXMLNode("cvsfile"));
+			 * Dieser Versuch redundaten Kode zu eliminieren hat leider nicht
+			 * funktioniert. this.setCvsfile(this.getValueOfXMLNode("cvsfile"));
 			 */
-			
-			
+
 			/* Lese Element convert-cvs-dates-to-iso-date */
 			NodeList nodeDateToIso = document.getElementsByTagName("convert-cvs-dates-to-iso-date");
 			Element elementIsoDate = (Element) nodeDateToIso.item(0);
 			String flagDateToIso = elementIsoDate.getFirstChild().getTextContent();
-			if(flagDateToIso!=null ){
-				if(flagDateToIso.equals("true"))
+			if (flagDateToIso != null) {
+				if (flagDateToIso.equals("true"))
 					this.setDateIsISODate(true);
-				else{
+				else {
 					this.setDateIsISODate(false);
 				}
 			}
-			
-			
-			
-			
-			
-			/* Lese Element delimeter*/
+
+			/* Lese Element delimeter */
 			NodeList nodeDelimeterCsvFile = document.getElementsByTagName("delimeter");
 			Element elementDelimeter = (Element) nodeDelimeterCsvFile.item(0);
 			String delimeterCSVFile = elementDelimeter.getFirstChild().getTextContent();
 			this.setDelimeter(delimeterCSVFile.charAt(0));
-	
-			
+
 			/* Lese Element dbtype */
 			NodeList nodeDbType = document.getElementsByTagName("dbtype");
 			Element elementDbType = (Element) nodeDbType.item(0);
 			this.setDbtype(elementDbType.getFirstChild().getTextContent());
-			
+
 			/* Lese Element localhost */
 			NodeList nodeLocalhost = document.getElementsByTagName("host");
 			Element elementLocalhost = (Element) nodeLocalhost.item(0);
@@ -223,8 +211,8 @@ public class ConfigurationCvsToDB {
 			Element elementMapCsvToDb = (Element) nodeMapCsvToDb.item(0);
 			NodeList nodeListMappingFields = elementMapCsvToDb.getElementsByTagName("field-mapping");
 			int j = nodeListMappingFields.getLength();
-			
-			//conToDb=this.getConnectionToDb();
+
+			// conToDb=this.getConnectionToDb();
 			for (int i = 0; i < j; i++) {
 
 				Element elementFieldMapping = (Element) nodeListMappingFields.item(i);
@@ -232,12 +220,13 @@ public class ConfigurationCvsToDB {
 				NodeList nodeDbField = elementFieldMapping.getElementsByTagName("table-column");
 				FieldCVSToDb fCvsToDb = new FieldCVSToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
 						nodeDbField.item(0).getFirstChild().getTextContent());
-				
-				/*try {
-					System.out.println("Verbindung zur Datenbank ist geschlossen: " + conToDb.isClosed());
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}*/
+
+				/*
+				 * try { System.out.
+				 * println("Verbindung zur Datenbank ist geschlossen: " +
+				 * conToDb.isClosed()); } catch (SQLException e) {
+				 * e.printStackTrace(); }
+				 */
 				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
 						+ nodeDbField.item(0).getFirstChild().getTextContent());
 				this.addMapField(fCvsToDb);
@@ -265,10 +254,24 @@ public class ConfigurationCvsToDB {
 	public Connection getConnectionToDb() {
 		/* Auch hier redundaten Kode neutralisieren */
 		if (this.getDbtype().equals("mysql")) {
-			
+
 			try {
-				conToDb = DriverManager.getConnection("jdbc:mysql://" + this.localhost+ ":" + this.getPort()+ "/" + this.getDatabase() + "?" + "user="
-						+ this.getUser() + "&password=" + this.getPassword());
+				conToDb = DriverManager.getConnection("jdbc:mysql://" + this.localhost + ":" + this.getPort() + "/"
+						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword());
+
+			} catch (SQLException ex) {
+				// handle any errors
+				System.out.println("SQLException: " + ex.getMessage());
+				System.out.println("SQLState: " + ex.getSQLState());
+				System.out.println("VendorError: " + ex.getErrorCode());
+			}
+			return conToDb;
+		}
+
+		if (this.getDbtype().equals("sqlite")) {
+
+			try {
+				conToDb = DriverManager.getConnection("jdbc:sqlite://" + this.getDatabase());
 
 			} catch (SQLException ex) {
 				// handle any errors
@@ -281,12 +284,11 @@ public class ConfigurationCvsToDB {
 		return null;
 
 	}
-	
-	private String getValueOfXMLNode(String xmlNode){
-		String xmlNodeValue=xmlNode;
+
+	private String getValueOfXMLNode(String xmlNode) {
+		String xmlNodeValue = xmlNode;
 		/* Die Methode funktioniert noch nicht */
-		
-		
+
 		NodeList nodeOfTag = document.getElementsByTagName(xmlNodeValue);
 		Element elementOfTag = (Element) nodeOfTag.item(0);
 		String valueOfElement = elementOfTag.getFirstChild().getTextContent();
