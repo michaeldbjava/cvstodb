@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <csvtodb>
-	<csvfile>FiBu-Profin-Bewegungsdaten.csv</csvfile>
+	<csvfile>FiBu-Profin-Bewegungsdaten3.csv</csvfile>
 	<delimeter>;</delimeter>
 	<database>
-		<!-- dbtypes: 
-			+ mysql, 
-			+ sqlite, if you use sqlite then you need only database name and not host, port and user
-		 (future release ... mssql, postgrsql ) datbase: select 
-			database of database server port: port number of database server user: user 
-			of database password: password for user of database -->
+		
+		<!-- MySQL 
 		<dbtype>mysql</dbtype>
 		<database_name>uebungsdatenbank</database_name>
 		<host>localhost</host>
@@ -16,6 +12,16 @@
 		<user>root</user>
 
 		<password>montag</password>
+		-->
+		
+		<!-- sqlite -->
+		<dbtype>sqlite</dbtype>
+		<database_name>C:\\sqllite\\testdb</database_name>
+		<host>NO VALUE HERE</host>
+		<port>NO VALUE HERE</port>
+		<user>NO VALUE HERE</user>
+
+		<password>NO VALUE HERE</password>
 	</database>
 	<!-- Tabel to map -->
 	<table>rechnung</table>
@@ -32,7 +38,7 @@
 	<map-csv-fields-to-db>
 
 		<field-mapping>
-			<csv-field>datum</csv-field>
+			<csv-field>Datum</csv-field>
 			<table-column>datum</table-column>
 		</field-mapping>
 		<field-mapping>

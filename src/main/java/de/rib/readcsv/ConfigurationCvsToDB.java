@@ -7,9 +7,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -131,8 +134,14 @@ public class ConfigurationCvsToDB {
 	public boolean readConfigFile(String pathXMLConfigFile) {
 		try {
 			File xmlFile = new File(pathXMLConfigFile);
+			File xsdFile = new File("cvstodb_config_schema.xsd");
+			
+			
+			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			Schema schema = schemaFactory.newSchema(xsdFile);
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			dbFactory.setSchema(schema);
 			DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
 			document = documentBuilder.parse(xmlFile);
 
