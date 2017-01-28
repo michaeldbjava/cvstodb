@@ -21,7 +21,7 @@ import de.rib.datehelper.ConvertDateToIso;
 public class ImportCSVToDb {
 
 	public static void main(String[] args) {
-		String pathOfConfigFile =args[0];;
+		String pathOfConfigFile =args[0];
 		boolean configFileExists=false;
 		/* If first argument is an path to config file then use it. In other case use default file*/
 		if(args.length!=0){
@@ -31,7 +31,7 @@ public class ImportCSVToDb {
 			System.out.println("Config File Exists: " + configFileExists);
 		}
 		// Als erstes wird ein Objekt vom Typ ConfigurationCvsToDB erstellt.
-		ConfigurationCvsToDB cvsDBConfig = new ConfigurationCvsToDB();
+		ConfigurationCsvToDB cvsDBConfig = new ConfigurationCsvToDB();
 		if(configFileExists==true){
 			System.out.println("Lese Config Datei: "+pathOfConfigFile);
 			cvsDBConfig.readConfigFile(pathOfConfigFile);
@@ -51,7 +51,7 @@ public class ImportCSVToDb {
 			 * Parser
 			 */
 
-			ArrayList<FieldCVSToDb> listOfFields = cvsDBConfig.getMapList();
+			ArrayList<FieldCSVToDb> listOfFields = cvsDBConfig.getMapList();
 
 			// Datum;Konto1;Konto2;Betrag;RechnungsNr;GutschriftKennz;FaelligkeitDatum;Kostenstelle;Buchungstext;BelegNr;VerdichtungsKz
 			//Reader in = new FileReader(cvsDBConfig.getCvsfile());
@@ -69,7 +69,7 @@ public class ImportCSVToDb {
 			 Iterable<CSVRecord> records = parser.getRecords();
 			String columnList = "(";
 			for (int i = 0; i < listOfFields.size(); i++) {
-				FieldCVSToDb fCvsDb = listOfFields.get(i);
+				FieldCSVToDb fCvsDb = listOfFields.get(i);
 				if (i == 0) {
 					columnList = columnList + fCvsDb.getDbField();
 				} else {
@@ -86,7 +86,7 @@ public class ImportCSVToDb {
 			for (CSVRecord record : records) {
 				String valueList = "(";
 				for (int i = 0; i < listOfFields.size(); i++) {
-					FieldCVSToDb fCvsDb = listOfFields.get(i);
+					FieldCSVToDb fCvsDb = listOfFields.get(i);
 					boolean isNumericType = tMI.isNumeric(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 					boolean isDateType = tMI.isDate(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 					String value = record.get(fCvsDb.getCvsField());
