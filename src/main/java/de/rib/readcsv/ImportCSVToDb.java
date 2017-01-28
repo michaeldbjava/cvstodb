@@ -53,17 +53,10 @@ public class ImportCSVToDb {
 
 			ArrayList<FieldCSVToDb> listOfFields = cvsDBConfig.getMapList();
 
-			// Datum;Konto1;Konto2;Betrag;RechnungsNr;GutschriftKennz;FaelligkeitDatum;Kostenstelle;Buchungstext;BelegNr;VerdichtungsKz
-			//Reader in = new FileReader(cvsDBConfig.getCvsfile());
+			
 			File file = new File(cvsDBConfig.getCvsfile());
-			/*
-			 * Iterable<CSVRecord> records = CSVFormat.newFormat(';')
-			 * .withHeader("Datum", "Konto1", "Konto2", "Betrag", "RechnungsNr",
-			 * "GutschriftKennz", "FaelligkeitDatum", "Kostenstelle",
-			 * "Buchungstext", "BelegNr", "VerdichtungsKz") .parse(in);
-			 */
+			
 			CSVFormat csvFormat = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withRecordSeparator("\n").withFirstRecordAsHeader();
-			//Iterable<CSVRecord> records = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withFirstRecordAsHeader().parse(in);
 			
 			 CSVParser parser = CSVParser.parse(file,StandardCharsets.UTF_8, csvFormat);
 			 Iterable<CSVRecord> records = parser.getRecords();
@@ -135,14 +128,7 @@ public class ImportCSVToDb {
 			con.commit();
 			
 			statement.close();
-			/*
-			 * Reader in = new
-			 * FileReader("C:\\Freigabe\\export\\FiBu-Profin-Bewegungsdaten.csv"
-			 * ); Iterable<CSVRecord> records =
-			 * CSVFormat.newFormat(';').parse(in); for (CSVRecord record :
-			 * records) { String columnOne = record.get(0); String columnTwo =
-			 * record.get(1); System.out.println(columnOne); }
-			 */
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
