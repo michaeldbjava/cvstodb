@@ -24,19 +24,26 @@
 				<xs:element name="map-csv-fields-to-db">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="field-mapping" maxOccurs="unbounded">
-								<xs:complexType>
-									<xs:sequence>
-										<xs:element name="csv-field" type="xs:string" />
-										<xs:element name="table-column" type="xs:string" />
-									</xs:sequence>
-								</xs:complexType>
-							</xs:element>
-
+								<xs:element name="field-mapping" maxOccurs="unbounded">
+									<xs:complexType>
+										<xs:sequence>
+											<xs:choice>
+												<xs:element name="csv-field" type="xs:string" />
+												<xs:element name="expression" type="xs:string" />
+											</xs:choice>
+											<xs:element name="table-column" type="xs:string" />
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+								
+								
+								
 
 						</xs:sequence>
 					</xs:complexType>
 				</xs:element>
+
+
 
 			</xs:sequence>
 		</xs:complexType>

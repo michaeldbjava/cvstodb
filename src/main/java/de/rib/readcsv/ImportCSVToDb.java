@@ -21,26 +21,28 @@ import de.rib.datehelper.ConvertDateToIso;
 public class ImportCSVToDb {
 
 	public static void main(String[] args) {
-		String pathOfConfigFile =args[0];
-		boolean configFileExists=false;
-		/* If first argument is an path to config file then use it. In other case use default file*/
-		if(args.length!=0){
+		String pathOfConfigFile = args[0];
+		boolean configFileExists = false;
+		/*
+		 * If first argument is an path to config file then use it. In other
+		 * case use default file
+		 */
+		if (args.length != 0) {
 			Path path = Paths.get(pathOfConfigFile);
 			System.out.println("Übergebener Pfad: " + pathOfConfigFile);
-			configFileExists= Files.exists(path,new LinkOption[]{ LinkOption.NOFOLLOW_LINKS});
+			configFileExists = Files.exists(path, new LinkOption[] { LinkOption.NOFOLLOW_LINKS });
 			System.out.println("Config File Exists: " + configFileExists);
 		}
 		// Als erstes wird ein Objekt vom Typ ConfigurationCvsToDB erstellt.
 		ConfigurationCsvToDB cvsDBConfig = new ConfigurationCsvToDB();
-		if(configFileExists==true){
-			System.out.println("Lese Config Datei: "+pathOfConfigFile);
+		if (configFileExists == true) {
+			System.out.println("Lese Config Datei: " + pathOfConfigFile);
 			cvsDBConfig.readConfigFile(pathOfConfigFile);
-		}
-		else{
+		} else {
 			System.out.println("Lese Standard Config Datei");
 			cvsDBConfig.readConfigFile("csvtodb_config.xml");
 		}
-		
+
 		Connection con = cvsDBConfig.getConnectionToDb();
 		// TODO Auto-generated method stub
 		try {
@@ -53,13 +55,13 @@ public class ImportCSVToDb {
 
 			ArrayList<FieldCSVToDb> listOfFields = cvsDBConfig.getMapList();
 
-			
 			File file = new File(cvsDBConfig.getCvsfile());
-			
-			CSVFormat csvFormat = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withRecordSeparator("\n").withFirstRecordAsHeader();
-			
-			 CSVParser parser = CSVParser.parse(file,StandardCharsets.UTF_8, csvFormat);
-			 Iterable<CSVRecord> records = parser.getRecords();
+
+			CSVFormat csvFormat = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withRecordSeparator("\n")
+					.withFirstRecordAsHeader();
+
+			CSVParser parser = CSVParser.parse(file, StandardCharsets.UTF_8, csvFormat);
+			Iterable<CSVRecord> records = parser.getRecords();
 			String columnList = "(";
 			for (int i = 0; i < listOfFields.size(); i++) {
 				FieldCSVToDb fCvsDb = listOfFields.get(i);
@@ -80,45 +82,48 @@ public class ImportCSVToDb {
 				String valueList = "(";
 				for (int i = 0; i < listOfFields.size(); i++) {
 					FieldCSVToDb fCvsDb = listOfFields.get(i);
+
 					boolean isNumericType = tMI.isNumeric(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 					boolean isDateType = tMI.isDate(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
-					String value = record.get(fCvsDb.getCvsField());
-					if (isNumericType == true) {
-						if (i == 0) {
-							valueList = valueList + value.replace(',', '.');
+					String field = fCvsDb.getCvsField();
+
+						String value = record.get(fCvsDb.getCvsField());
+						if (isNumericType == true) {
+							if (i == 0) {
+								valueList = valueList + value.replace(',', '.');
+							} else {
+								valueList = valueList + "," + value.replace(',', '.');
+
+							}
 						} else {
-							valueList = valueList + "," + value.replace(',', '.');
+							if (isDateType == true) {
+								if (cvsDBConfig.isDateIsISODate()) {
+									if (i == 0) {
+										valueList = valueList + "'" + ConvertDateToIso.convert(value) + "'";
+									} else {
+										valueList = valueList + ",'" + ConvertDateToIso.convert(value) + "'";
 
-						}
-					} else {
-						if (isDateType == true) {
-							if (cvsDBConfig.isDateIsISODate()) {
-								if (i == 0) {
-									valueList = valueList + "'" + ConvertDateToIso.convert(value) + "'";
+									}
 								} else {
-									valueList = valueList + ",'" + ConvertDateToIso.convert(value) + "'";
+									if (i == 0) {
+										valueList = valueList + "'" + value + "'";
+									} else {
+										valueList = valueList + ",'" + value + "'";
 
+									}
 								}
 							} else {
 								if (i == 0) {
-									valueList = valueList + "'" +value  + "'";
+									valueList = valueList + "'" + value + "'";
 								} else {
 									valueList = valueList + ",'" + value + "'";
 
 								}
-							}
-						} else {
-							if (i == 0) {
-								valueList = valueList + "'" + value + "'";
-							} else {
-								valueList = valueList + ",'" + value + "'";
 
 							}
 
-						}
-
+						
 					}
-
 				}
 				valueList = valueList + ")";
 				System.out.println("INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES " + valueList);
@@ -126,9 +131,8 @@ public class ImportCSVToDb {
 			}
 			statement.executeBatch();
 			con.commit();
-			
+
 			statement.close();
-			
 
 		} catch (Exception e) {
 			e.printStackTrace();

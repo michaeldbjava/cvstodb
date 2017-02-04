@@ -134,7 +134,7 @@ public class ConfigurationCsvToDB {
 	public boolean readConfigFile(String pathXMLConfigFile) {
 		try {
 			File xmlFile = new File(pathXMLConfigFile);
-			File xsdFile = new File("cvstodb_config_schema.xsd");
+			File xsdFile = new File("csvtodb_config_schema.xsd");
 			
 			
 			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -219,25 +219,48 @@ public class ConfigurationCsvToDB {
 			NodeList nodeMapCsvToDb = document.getElementsByTagName("map-csv-fields-to-db");
 			Element elementMapCsvToDb = (Element) nodeMapCsvToDb.item(0);
 			NodeList nodeListMappingFields = elementMapCsvToDb.getElementsByTagName("field-mapping");
+			//NodeList nodeListMappingExpression = elementMapCsvToDb.getElementsByTagName("calculated-value-mapping");
 			int j = nodeListMappingFields.getLength();
 
+			
+			
 			// conToDb=this.getConnectionToDb();
 			for (int i = 0; i < j; i++) {
 
 				Element elementFieldMapping = (Element) nodeListMappingFields.item(i);
+				
 				NodeList nodeCsvField = elementFieldMapping.getElementsByTagName("csv-field");
+				NodeList nodeExpressionField = elementFieldMapping.getElementsByTagName("expression");
 				NodeList nodeDbField = elementFieldMapping.getElementsByTagName("table-column");
-				FieldCSVToDb fCvsToDb = new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
+				FieldCSVToDb fCvsToDb=null;
+				if(nodeCsvField.getLength()!=0){
+					System.out.println("Es handelt sich um ein CSV Feld");
+				 fCvsToDb = new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
 						nodeDbField.item(0).getFirstChild().getTextContent());
-
+				}
+				else if(nodeExpressionField.getLength()!=0){
+					System.out.println("Es handelt sich um eine Expression");
+					fCvsToDb = new FieldCSVToDb(nodeExpressionField.item(0).getFirstChild().getTextContent(),
+							nodeDbField.item(0).getFirstChild().getTextContent());
+				}
 				/*
 				 * try { System.out.
 				 * println("Verbindung zur Datenbank ist geschlossen: " +
 				 * conToDb.isClosed()); } catch (SQLException e) {
 				 * e.printStackTrace(); }
 				 */
+				if(nodeCsvField!=null && nodeCsvField.getLength()!=0)
 				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
 						+ nodeDbField.item(0).getFirstChild().getTextContent());
+				
+				if(nodeExpressionField!=null && nodeExpressionField.getLength()!=0){
+					System.out.println("Content Node Expression: " + nodeExpressionField.item(0).getFirstChild().getTextContent());
+					System.out.println("Content Node dbfield: " + nodeDbField.item(0).getFirstChild().getTextContent());
+					System.out.println(nodeExpressionField.item(0).getFirstChild().getTextContent() + "-->"
+							+ nodeDbField.item(0).getFirstChild().getTextContent());
+										
+				}
+					
 				this.addMapField(fCvsToDb);
 			}
 
