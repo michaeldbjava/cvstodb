@@ -32,6 +32,7 @@ public class ConfigurationCsvToDB {
 	private char delimeter;
 	private boolean dateIsISODate = false;
 	private ArrayList<FieldCSVToDb> mapList = new ArrayList<FieldCSVToDb>();
+	private ArrayList<FieldEXPRESSIONToDB> mapListExpressions = new ArrayList<FieldEXPRESSIONToDB>();
 	private Connection conToDb = null;
 	private Document document = null;
 
@@ -89,6 +90,16 @@ public class ConfigurationCsvToDB {
 
 	public void setMapList(ArrayList<FieldCSVToDb> mapList) {
 		this.mapList = mapList;
+	}
+	
+	
+
+	public ArrayList<FieldEXPRESSIONToDB> getMapListExpressions() {
+		return mapListExpressions;
+	}
+
+	public void setMapListExpressions(ArrayList<FieldEXPRESSIONToDB> mapListExpressions) {
+		this.mapListExpressions = mapListExpressions;
 	}
 
 	public boolean addMapField(FieldCSVToDb e) {
@@ -230,39 +241,45 @@ public class ConfigurationCsvToDB {
 				Element elementFieldMapping = (Element) nodeListMappingFields.item(i);
 				
 				NodeList nodeCsvField = elementFieldMapping.getElementsByTagName("csv-field");
-				NodeList nodeExpressionField = elementFieldMapping.getElementsByTagName("expression");
 				NodeList nodeDbField = elementFieldMapping.getElementsByTagName("table-column");
-				FieldCSVToDb fCvsToDb=null;
-				if(nodeCsvField.getLength()!=0){
-					System.out.println("Es handelt sich um ein CSV Feld");
-				 fCvsToDb = new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
+				FieldCSVToDb fCvsToDb=new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
 						nodeDbField.item(0).getFirstChild().getTextContent());
-				}
-				else if(nodeExpressionField.getLength()!=0){
-					System.out.println("Es handelt sich um eine Expression");
-					fCvsToDb = new FieldCSVToDb(nodeExpressionField.item(0).getFirstChild().getTextContent(),
-							nodeDbField.item(0).getFirstChild().getTextContent());
-				}
+				
 				/*
 				 * try { System.out.
 				 * println("Verbindung zur Datenbank ist geschlossen: " +
 				 * conToDb.isClosed()); } catch (SQLException e) {
 				 * e.printStackTrace(); }
 				 */
-				if(nodeCsvField!=null && nodeCsvField.getLength()!=0)
 				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
 						+ nodeDbField.item(0).getFirstChild().getTextContent());
 				
-				if(nodeExpressionField!=null && nodeExpressionField.getLength()!=0){
-					System.out.println("Content Node Expression: " + nodeExpressionField.item(0).getFirstChild().getTextContent());
-					System.out.println("Content Node dbfield: " + nodeDbField.item(0).getFirstChild().getTextContent());
-					System.out.println(nodeExpressionField.item(0).getFirstChild().getTextContent() + "-->"
-							+ nodeDbField.item(0).getFirstChild().getTextContent());
-										
-				}
+				
 					
 				this.addMapField(fCvsToDb);
 			}
+
+			
+			/*<map-calculated-fields-to-db>
+			<calculated-value-mapping>
+				<expression>now()</expression>
+				<table-column>imported-datum</table-column>
+			</calculated-value-mapping>
+		</map*/
+			NodeList nodeListMappingExpressionsFields = document.getElementsByTagName("map-calculated-fields-to-db");
+			Element elementMapCalculatedFieldsToDb = (Element) nodeListMappingExpressionsFields.item(0);
+			NodeList nodeListMappingCalculatedValuesToFields = elementMapCalculatedFieldsToDb.getElementsByTagName("calculated-value-mapping");
+			int z = nodeListMappingCalculatedValuesToFields.getLength();
+			for (int i = 0; i < z; i++) {
+				Element calculatedValueToFieldMapping = (Element) nodeListMappingCalculatedValuesToFields.item(i);
+				NodeList nodeExpression = calculatedValueToFieldMapping.getElementsByTagName("expression");
+				NodeList nodeTableColumn = calculatedValueToFieldMapping.getElementsByTagName("table-column");
+				//nodeCsvField.item(0).getFirstChild().getTextContent()
+				FieldEXPRESSIONToDB fETDB = new FieldEXPRESSIONToDB(nodeExpression.item(0).getFirstChild().getTextContent(),nodeTableColumn.item(0).getFirstChild().getTextContent());
+				mapListExpressions.add(fETDB);
+			}
+			
+			
 
 			System.out.println("Ausgelesener Pfad aus XML Datei: " + this.getCvsfile());
 			System.out.println("Datenbank aus XML Datei: " + this.getDatabase());

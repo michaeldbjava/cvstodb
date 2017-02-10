@@ -72,9 +72,24 @@ public class ImportCSVToDb {
 				}
 
 			}
-			columnList = columnList + ")";
-			// System.out.println("Column List: " + columnList);
+			
 
+			ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
+			if (listExpressions != null) {
+				for (int i = 0; i < listExpressions.size(); i++) {
+					FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
+					System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
+					if (i == 0) {
+						columnList = columnList + "," + fETDB.getTableColumn();
+					} else {
+						columnList = columnList + "," + fETDB.getTableColumn();
+					}
+					System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
+				}
+			}
+			// System.out.println("Column List: " + columnList);
+			columnList = columnList + ")";
+			System.out.println(columnList);
 			con.setAutoCommit(false);
 			Statement statement = con.createStatement();
 			TypMetaInformation tMI = new TypMetaInformation();
@@ -87,30 +102,22 @@ public class ImportCSVToDb {
 					boolean isDateType = tMI.isDate(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 					String field = fCvsDb.getCvsField();
 
-						String value = record.get(fCvsDb.getCvsField());
-						if (isNumericType == true) {
-							if (i == 0) {
-								valueList = valueList + value.replace(',', '.');
-							} else {
-								valueList = valueList + "," + value.replace(',', '.');
-
-							}
+					String value = record.get(fCvsDb.getCvsField());
+					if (isNumericType == true) {
+						if (i == 0) {
+							valueList = valueList + value.replace(',', '.');
 						} else {
-							if (isDateType == true) {
-								if (cvsDBConfig.isDateIsISODate()) {
-									if (i == 0) {
-										valueList = valueList + "'" + ConvertDateToIso.convert(value) + "'";
-									} else {
-										valueList = valueList + ",'" + ConvertDateToIso.convert(value) + "'";
+							valueList = valueList + "," + value.replace(',', '.');
 
-									}
+						}
+					} else {
+						if (isDateType == true) {
+							if (cvsDBConfig.isDateIsISODate()) {
+								if (i == 0) {
+									valueList = valueList + "'" + ConvertDateToIso.convert(value) + "'";
 								} else {
-									if (i == 0) {
-										valueList = valueList + "'" + value + "'";
-									} else {
-										valueList = valueList + ",'" + value + "'";
+									valueList = valueList + ",'" + ConvertDateToIso.convert(value) + "'";
 
-									}
 								}
 							} else {
 								if (i == 0) {
@@ -119,14 +126,36 @@ public class ImportCSVToDb {
 									valueList = valueList + ",'" + value + "'";
 
 								}
+							}
+						} else {
+							if (i == 0) {
+								valueList = valueList + "'" + value + "'";
+							} else {
+								valueList = valueList + ",'" + value + "'";
 
 							}
 
-						
+						}
+
+					}
+				}
+				
+				if (listExpressions != null) {
+					for (int i = 0; i < listExpressions.size(); i++) {
+						FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
+						System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
+						if (i == 0) {
+							valueList = valueList + "," + fETDB.getExpression();
+						} else {
+							valueList = valueList + "," + fETDB.getExpression();
+						}
+						System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
 					}
 				}
 				valueList = valueList + ")";
-				System.out.println("INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES " + valueList);
+				System.out.println(valueList);
+				System.out.println("INSERT INTO " + cvsDBConfig.getTable() +
+				 " " + columnList + " VALUES " + valueList);
 				statement.addBatch("INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES " + valueList);
 			}
 			statement.executeBatch();
