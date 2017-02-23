@@ -90,5 +90,24 @@ public class TypMetaInformation {
 		}
 		return datetype;
 	}
+	
+	public int getTyp(String tableName,String columnName,Connection con){
+		DatabaseMetaData dBM = null;
+		this.con=con;
+		try{
+//			System.out.println("Verbindung in TypMetaInformation ist Null: " + con==null);
+//			System.out.println("Verbindung in geschlossen: " + con.isClosed());
+			dBM=con.getMetaData();
+			ResultSet rsColumnMeta = dBM.getColumns(null, null, tableName, columnName);
+			rsColumnMeta.next();
+			int typeOfColumn = rsColumnMeta.getInt(5);
+			return typeOfColumn;
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+			return 0;
+		}
+		
+	}
 
 }
