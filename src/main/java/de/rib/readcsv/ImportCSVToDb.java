@@ -78,18 +78,18 @@ public class ImportCSVToDb {
 			if (listExpressions != null) {
 				for (int i = 0; i < listExpressions.size(); i++) {
 					FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
-					System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
+					//System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
 					if (i == 0) {
 						columnList = columnList + "," + fETDB.getTableColumn();
 					} else {
 						columnList = columnList + "," + fETDB.getTableColumn();
 					}
-					System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
+					//System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
 				}
 			}
 			// System.out.println("Column List: " + columnList);
 			columnList = columnList + ")";
-			System.out.println(columnList);
+			//System.out.println(columnList);
 			con.setAutoCommit(false);
 			Statement statement = con.createStatement();
 			TypMetaInformation tMI = new TypMetaInformation();
@@ -143,19 +143,21 @@ public class ImportCSVToDb {
 				if (listExpressions != null) {
 					for (int i = 0; i < listExpressions.size(); i++) {
 						FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
-						System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
+						//System.out.println("ExpressionToColumn Column:" + fETDB.getTableColumn());
 						if (i == 0) {
 							valueList = valueList + "," + fETDB.getExpression();
 						} else {
 							valueList = valueList + "," + fETDB.getExpression();
 						}
-						System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
+						//System.out.println("ExpressionToColumn Expression:" + fETDB.getExpression());
 					}
 				}
 				valueList = valueList + ")";
-				System.out.println(valueList);
-				System.out.println("INSERT INTO " + cvsDBConfig.getTable() +
-				 " " + columnList + " VALUES " + valueList);
+				//System.out.println(valueList);
+//				System.out.println("INSERT INTO " + cvsDBConfig.getTable() +
+//				 " " + columnList + " VALUES " + valueList);
+				
+				/* INSERT STATEMENTS IN ARRAY LIST schreiben, dann gemäß Primärschlüssel, siehe E-Mail und Link PostgreSQL*/
 				statement.addBatch("INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES " + valueList);
 			}
 			statement.executeBatch();
