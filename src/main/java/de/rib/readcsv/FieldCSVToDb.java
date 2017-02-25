@@ -3,7 +3,7 @@ package de.rib.readcsv;
 public class FieldCSVToDb {
 	String cvsField;
 	String dbField;
-	String type;
+	int type;
 	
 	
 	public FieldCSVToDb() {
@@ -27,10 +27,10 @@ public class FieldCSVToDb {
 	public void setDbField(String dbField) {
 		this.dbField = dbField;
 	}
-	public String getType() {
+	public int getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(int type) {
 		this.type = type;
 	}
 	

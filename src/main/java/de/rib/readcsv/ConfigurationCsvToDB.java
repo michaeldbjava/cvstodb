@@ -3,7 +3,9 @@ package de.rib.readcsv;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -258,8 +260,9 @@ public class ConfigurationCsvToDB {
 					
 				this.addMapField(fCvsToDb);
 			}
-
-			
+			System.out.println("Ermittle die Datentypen zu den Mapping Feldern!");
+			getConnectionToDb();
+			getTypeOfFilds();
 			/*<map-calculated-fields-to-db>
 			<calculated-value-mapping>
 				<expression>now()</expression>
@@ -306,7 +309,7 @@ public class ConfigurationCsvToDB {
 
 			try {
 				conToDb = DriverManager.getConnection("jdbc:mysql://" + this.localhost + ":" + this.getPort() + "/"
-						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword());
+						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword()+"&rewriteBatchedStatements=true");
 
 			} catch (SQLException ex) {
 				// handle any errors
@@ -323,7 +326,7 @@ public class ConfigurationCsvToDB {
 				conToDb = DriverManager.getConnection("jdbc:sqlite://" + this.getDatabase());
 
 			} catch (SQLException ex) {
-				// handle any errors
+				// handle any errorsint typOfColumn = tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 				System.out.println("SQLException: " + ex.getMessage());
 				System.out.println("SQLState: " + ex.getSQLState());
 				System.out.println("VendorError: " + ex.getErrorCode());
@@ -342,6 +345,32 @@ public class ConfigurationCsvToDB {
 		Element elementOfTag = (Element) nodeOfTag.item(0);
 		String valueOfElement = elementOfTag.getFirstChild().getTextContent();
 		return valueOfElement;
+	}
+	
+	private boolean getTypeOfFilds(){
+		DatabaseMetaData dBM = null;
+		ResultSet rsColumnMeta=null;
+		try{
+			for(FieldCSVToDb fCTD:mapList){
+				dBM=conToDb.getMetaData();
+				rsColumnMeta = dBM.getColumns(null, null, table, fCTD.getDbField());
+				rsColumnMeta.next();
+				int typeOfColumn = rsColumnMeta.getInt(5);
+				
+				fCTD.setType(typeOfColumn);
+			}
+			
+//			System.out.println("Verbindung in TypMetaInformation ist Null: " + con==null);
+//			System.out.println("Verbindung in geschlossen: " + con.isClosed());
+			rsColumnMeta.close();
+			return true;
+		}
+		catch(SQLException e){
+			e.printStackTrace();
+			return false;
+		}
+		
+	
 	}
 
 }

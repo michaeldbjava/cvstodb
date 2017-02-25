@@ -81,24 +81,48 @@ public class ImportCSVToDb {
 				String columnNamePK = rsPrimaryKey.getString(4);
 				primaryKeyList.add(columnNamePK);
 			}
-			for (int i = 0; i < listOfFields.size(); i++) {
-				FieldCSVToDb fCvsDb = listOfFields.get(i);
-				
-				if (i == 0) {
+			
+			/* Erzeuge eine Spalten Liste, für die Insert Anweisung*/
+			for (int i=0;i<listOfFields.size();i++) {
+				FieldCSVToDb fCvsDb=listOfFields.get(i);
+				if(i==0){
 					columnList = columnList + fCvsDb.getDbField();
-					if(!primaryKeyList.contains(fCvsDb.getDbField())){
-					columnUpdateList = columnUpdateList + fCvsDb.getDbField()+ "=? ";
-					}
-				} else {
-					columnList = columnList + "," + fCvsDb.getDbField();
-					if(!primaryKeyList.contains(fCvsDb.getDbField())){
-					columnUpdateList = columnUpdateList +  "," + fCvsDb.getDbField()+ "=? ";
-					}
+					
 				}
+				else{
+					columnList = columnList + "," + fCvsDb.getDbField();
+					
+				}
+				
 
 			}
 			
-			columnUpdateList=columnUpdateList.replaceFirst(",", "");
+			/* Liste definieren, die ausschließlich Felder aufnimmt, die aktualisiert werden sollen. Diese Liste darf keine Primärschlüsselspalten enthalten*/
+			List<FieldCSVToDb> updateFields = new ArrayList<FieldCSVToDb>();
+			for(int i=0;i<listOfFields.size();i++){
+				FieldCSVToDb fCvsDb = listOfFields.get(i);
+				if(!primaryKeyList.contains(fCvsDb.getDbField())){
+					updateFields.add(fCvsDb);
+				}
+			}
+			
+
+			/* Zusammensetzen der Wertzuweisungen (=?) der Update Spalten, für das PreparedStatement */
+			for(int i=0;i<updateFields.size();i++){
+				FieldCSVToDb fCvsDb2 = updateFields.get(i);
+				if(i==0){
+					columnUpdateList = columnUpdateList + fCvsDb2.getDbField()+ "=?";
+				}
+				else{
+					columnUpdateList = columnUpdateList +  "," + fCvsDb2.getDbField()+ "=?";
+				}
+			}
+				
+			
+			
+			
+			
+			//columnUpdateList=columnUpdateList.replaceFirst(",", "");
 			columnList = columnList + ")";
 			System.out.println(columnUpdateList);
 
@@ -112,33 +136,42 @@ public class ImportCSVToDb {
 				}
 
 			}
-
+			/* 
+			 * Hier werden die Feld Ausdrücke, die in der Konfigurationsdatei angegeben werden, zusammengebaut.
+			 * Da ich hier jetzt Prepared Statements verwende, müssen diese zunächst mit in die ? Stellvertreterlist für Werte mit aufgenommen werden.
+			 * 
+			 * Das Gleiche gilt natürlich für die Komma separierte Liste der Spaltennamen.
+			 */
+			ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
+			/*if (listExpressions != null) {
+				for (int i = 0; i < listExpressions.size(); i++) {
+					FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
+					if (i == 0) {
+						columnList = columnList + "," + fETDB.getTableColumn();
+						placeholderValues=placeholderValues+",?";
+					} else {
+						columnList = columnList + "," + fETDB.getTableColumn();
+						placeholderValues=placeholderValues+",?";
+					}
+					
+				}
+			}
+			*/
 			String sqlInstert = "INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES ("
 					+ placeholderValues + ") ON DUPLICATE KEY UPDATE " + columnUpdateList;
 			System.out.println(sqlInstert);
 			java.sql.PreparedStatement prepStatement = con.prepareStatement(sqlInstert);
 
-			ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
-			if (listExpressions != null) {
-				for (int i = 0; i < listExpressions.size(); i++) {
-					FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
-					// System.out.println("ExpressionToColumn Column:" +
-					// fETDB.getTableColumn());
-					if (i == 0) {
-						columnList = columnList + "," + fETDB.getTableColumn();
-					} else {
-						columnList = columnList + "," + fETDB.getTableColumn();
-					}
-					// System.out.println("ExpressionToColumn Expression:" +
-					// fETDB.getExpression());
-				}
-			}
+			
+			
 			// System.out.println("Column List: " + columnList);
 
 			// System.out.println(columnList);
-			con.setAutoCommit(false);
+			
 			TypMetaInformation tMI = new TypMetaInformation();
+			con.setAutoCommit(false);
 			for (CSVRecord record : records) {
+				
 				int j=0;
 				for (int i = 0; i < listOfFields.size(); i++) {
 					j++;
@@ -147,7 +180,7 @@ public class ImportCSVToDb {
 						System.out.println("i ist gleich 13");*/
 					FieldCSVToDb fCvsDb = listOfFields.get(i);
 
-					int typOfColumn = tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
+					int typOfColumn = fCvsDb.getType();
 
 					String value = record.get(fCvsDb.getCvsField());
 					/*System.out.println("Wert von j: " + j + " Wert aus Zeile:" + value );*/
@@ -277,22 +310,30 @@ public class ImportCSVToDb {
 					}
 				}
 				
-				/* So kann ich nicht vorgehen. Ich muss mir die Felder, die Übrigbleiben holen und in der Reihenfolge einfügen, wie Sie in den Wertzuweisungen vorliegen*/
 				
-				for (int i = 0; i < listOfFields.size(); i++) {
+				/* Das müssen wir uns noch mal gut Ausdrücke, die in der XML Datei angegeben werden, 
+				 * lassen sich wahrscheinlich nicht in PreparedStatements verwenden. Insbesondere dann, 
+				 * wenn wir hier Funktionsaufrufe festlegen. 
+				 * for(int i=0;i<listExpressions.size();i++){
+					j++;
+					FieldEXPRESSIONToDB fEXToDb = listExpressions.get(i);
 					
-					/*if(j==28){
-						System.out.println(j);;
-					}*/
-					
-					FieldCSVToDb fCvsDb = listOfFields.get(i);
+				}*/
+				
+				
+				/* 
+				 * Ich muss mir die Felder, die Übrigbleiben holen und in der Reihenfolge einfügen, wie Sie in den Wertzuweisungen vorliegen
+				 * Ich muss zunächst die Spalten ermitteln, die nicht Primäschlüsselspalten sind.
+				 * */
+				for(int i=0;i<updateFields.size();i++){
+					j++;
+					FieldCSVToDb fCvsDb = updateFields.get(i);
+					int typOfColumn  = fCvsDb.getType();
 
-					int typOfColumn = tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
-					if(!primaryKeyList.contains(fCvsDb.getDbField())){
-						j++;
+
 					String value = record.get(fCvsDb.getCvsField());
-//					System.out.println("Wert von j: " + j + " Wert aus Zeile:" + value );
-					
+					/*System.out.println("Wert von j: " + j + " Wert aus Zeile:" + value );*/
+
 					switch (typOfColumn) {
 					case Types.ARRAY:
 						System.out.println("Array Typ is not supported");
@@ -327,21 +368,16 @@ public class ImportCSVToDb {
 						prepStatement.setDate(j,new java.sql.Date(formatOfDate.parse(value).getTime()) );
 						break;
 					case Types.DECIMAL:
-						double doubleValueAfterCast = Double.parseDouble(value.replace(',', '.'));
-						
-						System.out.println("Double Value: " + doubleValueAfterCast);
-						BigDecimal b1 = BigDecimal.valueOf(doubleValueAfterCast);
-//						System.out.println("B1: " + b1.toString() );
-						prepStatement.setBigDecimal(j,b1);
+						prepStatement.setBigDecimal(j,BigDecimal.valueOf(Double.parseDouble(value.replace(',', '.'))));
 						break;
 					case Types.DISTINCT:
 						System.out.println("DISTINCT Typ is not supported");
 						break;
 					case Types.DOUBLE:
-						prepStatement.setDouble(j,Double.parseDouble(value.replace(',', '.')));
+						prepStatement.setDouble(j,Double.parseDouble(value));
 						break;
 					case Types.FLOAT:
-						prepStatement.setFloat(j,Float.parseFloat(value.replace(',', '.')));
+						prepStatement.setFloat(j,Float.parseFloat(value));
 						break;
 					case Types.INTEGER:
 						prepStatement.setInt(j,Integer.parseInt(value));
@@ -365,11 +401,10 @@ public class ImportCSVToDb {
 						prepStatement.setString(j,value);
 						break;
 					case Types.NULL:
-						System.out.println("NULL Typ is not supported");
+						System.out.println("NULL Typ is not supported");;
 						break;
 					case Types.NUMERIC:
-						double valueAftercast = Double.parseDouble(value.replace(',', '.'));
-						prepStatement.setDouble(j,valueAftercast);
+						prepStatement.setDouble(j,Double.parseDouble(value));
 						break;
 					case Types.NVARCHAR:
 						prepStatement.setString(j,value);
@@ -422,17 +457,22 @@ public class ImportCSVToDb {
 						break;
 					
 					}
-					prepStatement.addBatch();
-					}
+					
+					
 				}
+												
+				prepStatement.addBatch();
+				
 				
 				
 				
 			}
 
 			prepStatement.executeBatch();
-
 			con.commit();
+			con.close();
+			
+			
 
 
 		} catch (Exception e) {
