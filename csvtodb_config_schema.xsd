@@ -45,6 +45,7 @@
 									<xs:sequence>
 										<xs:element name="expression" type="xs:string" />
 										<xs:element name="table-column" type="xs:string" />
+										<xs:element name="table-column-type" type="xs:integer"/>
 									</xs:sequence>
 								</xs:complexType>
 							</xs:element>
