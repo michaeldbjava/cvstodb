@@ -4,6 +4,7 @@ public class FieldEXPRESSIONToDB {
 	private String expressionValue;
 	
 	private String tableColumn;
+	private int columnTyp;
 	
 
 	public FieldEXPRESSIONToDB() {
@@ -11,10 +12,11 @@ public class FieldEXPRESSIONToDB {
 	}
 
 	
-	public FieldEXPRESSIONToDB(String expressionValue, String tableColumn) {
+	public FieldEXPRESSIONToDB(String expressionValue, String tableColumn,int columnTyp) {
 		super();
 		this.expressionValue = expressionValue;
 		this.tableColumn = tableColumn;
+		this.columnTyp=columnTyp;
 	}
 
 
@@ -32,6 +34,16 @@ public class FieldEXPRESSIONToDB {
 
 	public void setTableColumn(String tableColumn) {
 		this.tableColumn = tableColumn;
+	}
+
+
+	public int getColumnTyp() {
+		return columnTyp;
+	}
+
+
+	public void setColumnTyp(int columnTyp) {
+		this.columnTyp = columnTyp;
 	}
 	
 	

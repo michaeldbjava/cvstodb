@@ -277,8 +277,10 @@ public class ConfigurationCsvToDB {
 				Element calculatedValueToFieldMapping = (Element) nodeListMappingCalculatedValuesToFields.item(i);
 				NodeList nodeExpression = calculatedValueToFieldMapping.getElementsByTagName("expression");
 				NodeList nodeTableColumn = calculatedValueToFieldMapping.getElementsByTagName("table-column");
+				NodeList nodeTableColumnType = calculatedValueToFieldMapping.getElementsByTagName("table-column-type");
+
 				//nodeCsvField.item(0).getFirstChild().getTextContent()
-				FieldEXPRESSIONToDB fETDB = new FieldEXPRESSIONToDB(nodeExpression.item(0).getFirstChild().getTextContent(),nodeTableColumn.item(0).getFirstChild().getTextContent());
+				FieldEXPRESSIONToDB fETDB = new FieldEXPRESSIONToDB(nodeExpression.item(0).getFirstChild().getTextContent(),nodeTableColumn.item(0).getFirstChild().getTextContent(),Integer.parseInt(nodeTableColumnType.item(0).getFirstChild().getTextContent()));
 				mapListExpressions.add(fETDB);
 			}
 			
