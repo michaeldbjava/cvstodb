@@ -21,6 +21,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import de.rib.errorhandling.CsvToDbErrorHandlingConfigFile;
+
 public class ConfigurationCsvToDB {
 
 	private String cvsfile;
@@ -155,7 +157,9 @@ public class ConfigurationCsvToDB {
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			dbFactory.setSchema(schema);
+			dbFactory.setValidating(false);
 			DocumentBuilder documentBuilder = dbFactory.newDocumentBuilder();
+			documentBuilder.setErrorHandler(new CsvToDbErrorHandlingConfigFile());
 			document = documentBuilder.parse(xmlFile);
 
 			/*
@@ -253,14 +257,14 @@ public class ConfigurationCsvToDB {
 				 * conToDb.isClosed()); } catch (SQLException e) {
 				 * e.printStackTrace(); }
 				 */
-				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
-						+ nodeDbField.item(0).getFirstChild().getTextContent());
+//				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
+//						+ nodeDbField.item(0).getFirstChild().getTextContent());
 				
 				
 					
 				this.addMapField(fCvsToDb);
 			}
-			System.out.println("Ermittle die Datentypen zu den Mapping Feldern!");
+//			System.out.println("Ermittle die Datentypen zu den Mapping Feldern!");
 			getConnectionToDb();
 			getTypeOfFilds();
 			/*<map-calculated-fields-to-db>
@@ -286,13 +290,21 @@ public class ConfigurationCsvToDB {
 			
 			
 
-			System.out.println("Ausgelesener Pfad aus XML Datei: " + this.getCvsfile());
-			System.out.println("Datenbank aus XML Datei: " + this.getDatabase());
-			System.out.println("Datenbank Typ aus XML Datei: " + this.getDbtype());
-			System.out.println("Datenbanknutzer aus XML Datei lesen: " + this.getUser());
-			System.out.println("Passwort aus XML Datei lesen: " + this.getPassword());
-			System.out.println("Datenbank Port aus XML Datei lesen: " + this.getPort());
-			System.out.println("Datenbank Tabelle aus XML Datei lesen: " + this.getTable());
+			System.out.println("****    1.1 Ausgelesener Pfad aus XML Datei: " + this.getCvsfile());
+			System.out.println("****    ");
+			System.out.println("****    1.2 Datenbank aus XML Datei: " + this.getDatabase());
+			System.out.println("****    ");
+			System.out.println("****    1.3 Datenbank Typ aus XML Datei: " + this.getDbtype());
+			System.out.println("****    ");
+			System.out.println("****    1.4 Datenbanknutzer aus XML Datei lesen: " + this.getUser());
+			System.out.println("****    ");
+			System.out.println("****    1.5 Passwort aus XML Datei lesen: " + this.getPassword());
+			System.out.println("****    ");
+			System.out.println("****    1.6 Datenbank Port aus XML Datei lesen: " + this.getPort());
+			System.out.println("****    ");
+			System.out.println("****    1.7 Datenbank Tabelle aus XML Datei lesen: " + this.getTable());
+			System.out.println("****    ");
+			System.out.println("****    ");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		} catch (SAXException se) {
