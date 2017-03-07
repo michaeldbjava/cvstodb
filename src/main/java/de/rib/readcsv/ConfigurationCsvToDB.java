@@ -368,6 +368,7 @@ public class ConfigurationCsvToDB {
 			for(FieldCSVToDb fCTD:mapList){
 				dBM=conToDb.getMetaData();
 				rsColumnMeta = dBM.getColumns(null, null, table, fCTD.getDbField());
+				
 				rsColumnMeta.next();
 				int typeOfColumn = rsColumnMeta.getInt(5);
 				
@@ -380,7 +381,7 @@ public class ConfigurationCsvToDB {
 			return true;
 		}
 		catch(SQLException e){
-			e.printStackTrace();
+			System.out.println("****     " + e.getLocalizedMessage());
 			return false;
 		}
 		
