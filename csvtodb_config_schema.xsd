@@ -37,10 +37,11 @@
 				</xs:element>
 
 
-				<xs:element name="map-calculated-fields-to-db">
+				<xs:element name="map-calculated-fields-to-db"  minOccurs="0"
+					maxOccurs="1">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="calculated-value-mapping" maxOccurs="unbounded">
+							<xs:element name="calculated-value-mapping">
 								<xs:complexType>
 									<xs:sequence>
 										<xs:element name="expression" type="xs:string" />
