@@ -1,9 +1,6 @@
 package de.rib.readcsv;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,20 +10,17 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-
-import com.mysql.jdbc.PreparedStatement;
-
-import de.rib.datehelper.ConvertDateToIso;
 
 public class ImportCSVToDb {
 
@@ -134,9 +128,24 @@ public class ImportCSVToDb {
 							columnUpdateList = columnUpdateList + "," + fCvsDb2.getDbField() + "=?";
 						}
 					}
+					
+					 ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
+					
+					if (listExpressions != null) {
+
+						for (int i = 0; i < listExpressions.size(); i++) {
+							FieldEXPRESSIONToDB fETDb = listExpressions.get(i);
+							if(updateFields.size()==0){
+								columnUpdateList = columnUpdateList + fETDb.getTableColumn() + "=?";
+							} else{
+								columnUpdateList = columnUpdateList + "," + fETDb.getTableColumn() + "=?";
+							}
+							
+						}
+					}
 
 					// columnUpdateList=columnUpdateList.replaceFirst(",", "");
-					columnList = columnList + ")";
+					
 					// System.out.println(columnUpdateList);
 
 					int listOfFieldsLength = listOfFields.size();
@@ -165,7 +174,8 @@ public class ImportCSVToDb {
 					/*
 					 * 
 					 * DAs hier muss noch eingebaut werden, aber zuerst das andere fertig machen ....
-					  ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
+					 * */
+					 
 					 
 
 					if (listExpressions != null) {
@@ -180,12 +190,12 @@ public class ImportCSVToDb {
 							}
 
 						}
-					}*/
-
+					}
+					columnList = columnList + ")";
 					String sqlInstert = "INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES ("
 							+ placeholderValues + ") ON DUPLICATE KEY UPDATE " + columnUpdateList;
 					System.out.println("****     4.0 PREPARED STATEMENT wurde formuliert!");
-					System.out.println("****    ");
+					System.out.println("****        " + sqlInstert);
 					java.sql.PreparedStatement prepStatement = con.prepareStatement(sqlInstert);
 
 					// System.out.println("Column List: " + columnList);
@@ -194,11 +204,12 @@ public class ImportCSVToDb {
 
 					con.setAutoCommit(false);
 					for (CSVRecord record : records) {
-
+						
 						int j = 0;
 						for (int i = 0; i < listOfFields.size(); i++) {
+							
 							j++;
-
+							System.out.println("Wert von j=" + j);
 							/*
 							 * if(i==13) System.out.println("i ist gleich 13");
 							 */
@@ -366,15 +377,176 @@ public class ImportCSVToDb {
 						 * }
 						 */
 
-						/*
-						 * Ich muss mir die Felder, die Übrigbleiben holen und
-						 * in der Reihenfolge einfügen, wie Sie in den
-						 * Wertzuweisungen vorliegen Ich muss zunächst die
-						 * Spalten ermitteln, die nicht Primäschlüsselspalten
-						 * sind.
-						 */
+						if (listExpressions != null) {
+
+							for (int i = 0; i < listExpressions.size(); i++) {
+								j++;
+								FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
+								if(fETDB.getExpression()!=null && fETDB.getExpression().equals("_NOW_")){
+									LocalDateTime currentDateTime = LocalDateTime.now();
+									DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+									String formatedDate = currentDateTime.format(formatter);
+									//System.out.println(formatedDate);
+									fETDB.setExpression(formatedDate);
+								}
+								int type = fETDB.getColumnTyp();
+								String value=fETDB.getExpression();
+								switch (type) {
+								case Types.ARRAY:
+									// System.out.println("Array Typ is not
+									// supported");
+									break;
+								case Types.BIGINT:
+									prepStatement.setInt(j, Integer.parseInt(value));
+									break;
+								case Types.BINARY:
+									// System.out.println("Binary Typ is not
+									// supported");
+									break;
+								case Types.BIT:
+									prepStatement.setBoolean(j, Boolean.parseBoolean(value));
+									break;
+								case Types.BLOB:
+									// System.out.println("Blob Typ is not
+									// supported");
+									break;
+								case Types.BOOLEAN:
+									prepStatement.setBoolean(j, Boolean.parseBoolean(value));
+									break;
+								case Types.CHAR:
+									prepStatement.setString(j, value);
+									break;
+								case Types.CLOB:
+									// System.out.println("CLOB Typ is not
+									// supported");
+									break;
+								case Types.DATALINK:
+									// System.out.println("DATALINK Typ is not
+									// supported");
+									break;
+								case Types.DATE:
+									String pattern = "yyyy-MM-dd";
+									SimpleDateFormat formatOfDate = new SimpleDateFormat(pattern);
+									prepStatement.setDate(j, new java.sql.Date(formatOfDate.parse(value).getTime()));
+									break;
+								case Types.DECIMAL:
+									prepStatement.setBigDecimal(j,
+											BigDecimal.valueOf(Double.parseDouble(value.replace(',', '.'))));
+									break;
+								case Types.DISTINCT:
+									// System.out.println("DISTINCT Typ is not
+									// supported");
+									break;
+								case Types.DOUBLE:
+									prepStatement.setDouble(j, Double.parseDouble(value));
+									break;
+								case Types.FLOAT:
+									prepStatement.setFloat(j, Float.parseFloat(value));
+									break;
+								case Types.INTEGER:
+									prepStatement.setInt(j, Integer.parseInt(value));
+									break;
+								case Types.JAVA_OBJECT:
+									// System.out.println("JAVA_OBJECT Typ is not
+									// supported");
+									break;
+								case Types.LONGNVARCHAR:
+									prepStatement.setString(j, value);
+									break;
+								case Types.LONGVARBINARY:
+									prepStatement.setString(j, value);
+									break;
+								case Types.LONGVARCHAR:
+									prepStatement.setString(j, value);
+									break;
+								case Types.NCHAR:
+									prepStatement.setString(j, value);
+									break;
+								case Types.NCLOB:
+									prepStatement.setString(j, value);
+									break;
+								case Types.NULL:
+									// System.out.println("NULL Typ is not
+									// supported");
+									;
+									break;
+								case Types.NUMERIC:
+									prepStatement.setDouble(j, Double.parseDouble(value));
+									break;
+								case Types.NVARCHAR:
+									prepStatement.setString(j, value);
+									break;
+								case Types.OTHER:
+									// System.out.println("OTHER Typ is not
+									// supported");
+									break;
+								case Types.REAL:
+									// System.out.println("REAL Typ is not
+									// supported");
+									break;
+								case Types.REF:
+									// System.out.println("REF Typ is not
+									// supported");
+									break;
+								case Types.REF_CURSOR:
+									// System.out.println("REF_CURSOR Typ is not
+									// supported");
+									break;
+								case Types.ROWID:
+									// System.out.println("ROWID Typ is not
+									// supported");
+									break;
+								case Types.SMALLINT:
+									prepStatement.setInt(j, Integer.parseInt(value));
+									break;
+								case Types.SQLXML:
+									// System.out.println("SQLXML Typ is not
+									// supported");
+									break;
+								case Types.STRUCT:
+									// System.out.println("STRUCT Typ is not
+									// supported");
+									break;
+								case Types.TIME:
+									prepStatement.setTime(j, new java.sql.Time(Integer.parseInt(value)));
+									break;
+								case Types.TIME_WITH_TIMEZONE:
+									prepStatement.setTime(j, new java.sql.Time(Integer.parseInt(value)));
+									break;
+								case Types.TIMESTAMP:
+									SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+									Timestamp t = new Timestamp(dateFormat.parse(value).getTime());
+									//System.out.println("Befor ich den Wert an PrepStatement uebgergebe" + t);
+									prepStatement.setTimestamp(j,t);
+									break;
+								case Types.TIMESTAMP_WITH_TIMEZONE:
+									prepStatement.setTimestamp(j, new java.sql.Timestamp(Long.parseLong(value)));
+									break;
+								case Types.TINYINT:
+									prepStatement.setInt(j, Integer.parseInt(value));
+									break;
+								case Types.VARBINARY:
+									// System.out.println("VARBINARY Typ is not
+									// supported");
+									break;
+								case Types.VARCHAR:
+									prepStatement.setString(j, value);
+									break;
+
+								}
+
+							}
+						}
+
+						
+						
+						
+						
+						System.out.println("######################## List der zu aktualisierenden Werte ############################");
 						for (int i = 0; i < updateFields.size(); i++) {
+							
 							j++;
+							System.out.println("Wert von j=" + j);
 							FieldCSVToDb fCvsDb = updateFields.get(i);
 							int typOfColumn = fCvsDb.getType();
 
@@ -528,13 +700,19 @@ public class ImportCSVToDb {
 
 						}
 
-						/* 04.03.2017 Ergänzung muss noch vorgenommen werden */
-						/*
+						/****	Liste der zu aktualisierenden Expressions ****/
 						if (listExpressions != null) {
 
 							for (int i = 0; i < listExpressions.size(); i++) {
+								j++;
 								FieldEXPRESSIONToDB fETDB = listExpressions.get(i);
-								
+								if(fETDB.getExpression()!=null && fETDB.getExpression().equals("_NOW_")){
+									LocalDateTime currentDateTime = LocalDateTime.now();
+									DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+									String formatedDate = currentDateTime.format(formatter);
+									//System.out.println(formatedDate);
+									fETDB.setExpression(formatedDate);
+								}
 								int type = fETDB.getColumnTyp();
 								String value=fETDB.getExpression();
 								switch (type) {
@@ -661,7 +839,9 @@ public class ImportCSVToDb {
 									break;
 								case Types.TIMESTAMP:
 									SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-									prepStatement.setTimestamp(j, new Timestamp(dateFormat.parse(value).getTime()));
+									Timestamp t = new Timestamp(dateFormat.parse(value).getTime());
+									//System.out.println("Befor ich den Wert an PrepStatement uebgergebe" + t);
+									prepStatement.setTimestamp(j,t);
 									break;
 								case Types.TIMESTAMP_WITH_TIMEZONE:
 									prepStatement.setTimestamp(j, new java.sql.Timestamp(Long.parseLong(value)));
@@ -680,8 +860,15 @@ public class ImportCSVToDb {
 								}
 
 							}
-						}*/
+						}
+
+						/* 04.03.2017 Ergänzung muss noch vorgenommen werden */
+						
+												
+						
+						//System.out.println(prepStatement.getMetaData());
 						prepStatement.addBatch();
+						System.out.println("######################## Ende Schleife ############################");
 
 					}
 
@@ -698,7 +885,10 @@ public class ImportCSVToDb {
 
 				} catch (Exception e) {
 					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getLocalizedMessage());
+					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getMessage());
+					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getCause());
 					System.out.println("****     ");
+					e.printStackTrace();
 
 					try {
 						System.out.println("****     3. Fuehre einen Rollback durch!");
@@ -708,7 +898,7 @@ public class ImportCSVToDb {
 						System.out.println("****     4. Rollback wurde erfolgreich durchgefuehrt!");
 						System.out.println("****     ");
 					} catch (Exception e1) {
-
+						e1.printStackTrace();
 					}
 				}
 			} else {

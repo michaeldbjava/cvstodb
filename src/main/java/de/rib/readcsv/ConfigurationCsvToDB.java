@@ -95,8 +95,6 @@ public class ConfigurationCsvToDB {
 	public void setMapList(ArrayList<FieldCSVToDb> mapList) {
 		this.mapList = mapList;
 	}
-	
-	
 
 	public ArrayList<FieldEXPRESSIONToDB> getMapListExpressions() {
 		return mapListExpressions;
@@ -150,8 +148,7 @@ public class ConfigurationCsvToDB {
 		try {
 			File xmlFile = new File(pathXMLConfigFile);
 			File xsdFile = new File("csvtodb_config_schema.xsd");
-			
-			
+
 			SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			Schema schema = schemaFactory.newSchema(xsdFile);
 
@@ -236,59 +233,63 @@ public class ConfigurationCsvToDB {
 			NodeList nodeMapCsvToDb = document.getElementsByTagName("map-csv-fields-to-db");
 			Element elementMapCsvToDb = (Element) nodeMapCsvToDb.item(0);
 			NodeList nodeListMappingFields = elementMapCsvToDb.getElementsByTagName("field-mapping");
-			//NodeList nodeListMappingExpression = elementMapCsvToDb.getElementsByTagName("calculated-value-mapping");
+			// NodeList nodeListMappingExpression =
+			// elementMapCsvToDb.getElementsByTagName("calculated-value-mapping");
 			int j = nodeListMappingFields.getLength();
 
-			
-			
 			// conToDb=this.getConnectionToDb();
 			for (int i = 0; i < j; i++) {
 
 				Element elementFieldMapping = (Element) nodeListMappingFields.item(i);
-				
+
 				NodeList nodeCsvField = elementFieldMapping.getElementsByTagName("csv-field");
 				NodeList nodeDbField = elementFieldMapping.getElementsByTagName("table-column");
-				FieldCSVToDb fCvsToDb=new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
+				FieldCSVToDb fCvsToDb = new FieldCSVToDb(nodeCsvField.item(0).getFirstChild().getTextContent(),
 						nodeDbField.item(0).getFirstChild().getTextContent());
-				
+
 				/*
 				 * try { System.out.
 				 * println("Verbindung zur Datenbank ist geschlossen: " +
 				 * conToDb.isClosed()); } catch (SQLException e) {
 				 * e.printStackTrace(); }
 				 */
-//				System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent() + "-->"
-//						+ nodeDbField.item(0).getFirstChild().getTextContent());
-				
-				
-					
+				// System.out.println(nodeCsvField.item(0).getFirstChild().getTextContent()
+				// + "-->"
+				// + nodeDbField.item(0).getFirstChild().getTextContent());
+
 				this.addMapField(fCvsToDb);
 			}
-//			System.out.println("Ermittle die Datentypen zu den Mapping Feldern!");
+			// System.out.println("Ermittle die Datentypen zu den Mapping
+			// Feldern!");
 			getConnectionToDb();
 			getTypeOfFilds();
-			/*<map-calculated-fields-to-db>
-			<calculated-value-mapping>
-				<expression>now()</expression>
-				<table-column>imported-datum</table-column>
-			</calculated-value-mapping>
-		</map*/
+			/*
+			 * <map-calculated-fields-to-db> <calculated-value-mapping>
+			 * <expression>now()</expression>
+			 * <table-column>imported-datum</table-column>
+			 * </calculated-value-mapping> </map
+			 */
 			NodeList nodeListMappingExpressionsFields = document.getElementsByTagName("map-calculated-fields-to-db");
-			Element elementMapCalculatedFieldsToDb = (Element) nodeListMappingExpressionsFields.item(0);
-			NodeList nodeListMappingCalculatedValuesToFields = elementMapCalculatedFieldsToDb.getElementsByTagName("calculated-value-mapping");
-			int z = nodeListMappingCalculatedValuesToFields.getLength();
-			for (int i = 0; i < z; i++) {
-				Element calculatedValueToFieldMapping = (Element) nodeListMappingCalculatedValuesToFields.item(i);
-				NodeList nodeExpression = calculatedValueToFieldMapping.getElementsByTagName("expression");
-				NodeList nodeTableColumn = calculatedValueToFieldMapping.getElementsByTagName("table-column");
-				NodeList nodeTableColumnType = calculatedValueToFieldMapping.getElementsByTagName("table-column-type");
+			if (nodeListMappingExpressionsFields != null && nodeListMappingExpressionsFields.getLength()!=0) {
+				Element elementMapCalculatedFieldsToDb = (Element) nodeListMappingExpressionsFields.item(0);
+				NodeList nodeListMappingCalculatedValuesToFields = elementMapCalculatedFieldsToDb
+						.getElementsByTagName("calculated-value-mapping");
+				int z = nodeListMappingCalculatedValuesToFields.getLength();
+				for (int i = 0; i < z; i++) {
+					Element calculatedValueToFieldMapping = (Element) nodeListMappingCalculatedValuesToFields.item(i);
+					NodeList nodeExpression = calculatedValueToFieldMapping.getElementsByTagName("expression");
+					NodeList nodeTableColumn = calculatedValueToFieldMapping.getElementsByTagName("table-column");
+					NodeList nodeTableColumnType = calculatedValueToFieldMapping
+							.getElementsByTagName("table-column-type");
 
-				//nodeCsvField.item(0).getFirstChild().getTextContent()
-				FieldEXPRESSIONToDB fETDB = new FieldEXPRESSIONToDB(nodeExpression.item(0).getFirstChild().getTextContent(),nodeTableColumn.item(0).getFirstChild().getTextContent(),Integer.parseInt(nodeTableColumnType.item(0).getFirstChild().getTextContent()));
-				mapListExpressions.add(fETDB);
+					// nodeCsvField.item(0).getFirstChild().getTextContent()
+					FieldEXPRESSIONToDB fETDB = new FieldEXPRESSIONToDB(
+							nodeExpression.item(0).getFirstChild().getTextContent(),
+							nodeTableColumn.item(0).getFirstChild().getTextContent(),
+							Integer.parseInt(nodeTableColumnType.item(0).getFirstChild().getTextContent()));
+					mapListExpressions.add(fETDB);
+				}
 			}
-			
-			
 
 			System.out.println("****    1.1 Ausgelesener Pfad aus XML Datei: " + this.getCvsfile());
 			System.out.println("****    ");
@@ -323,7 +324,8 @@ public class ConfigurationCsvToDB {
 
 			try {
 				conToDb = DriverManager.getConnection("jdbc:mysql://" + this.localhost + ":" + this.getPort() + "/"
-						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword()+"&rewriteBatchedStatements=true");
+						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword()
+						+ "&rewriteBatchedStatements=true");
 
 			} catch (SQLException ex) {
 				// handle any errors
@@ -340,7 +342,8 @@ public class ConfigurationCsvToDB {
 				conToDb = DriverManager.getConnection("jdbc:sqlite://" + this.getDatabase());
 
 			} catch (SQLException ex) {
-				// handle any errorsint typOfColumn = tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
+				// handle any errorsint typOfColumn =
+				// tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
 				System.out.println("SQLException: " + ex.getMessage());
 				System.out.println("SQLState: " + ex.getSQLState());
 				System.out.println("VendorError: " + ex.getErrorCode());
@@ -360,32 +363,32 @@ public class ConfigurationCsvToDB {
 		String valueOfElement = elementOfTag.getFirstChild().getTextContent();
 		return valueOfElement;
 	}
-	
-	private boolean getTypeOfFilds(){
+
+	private boolean getTypeOfFilds() {
 		DatabaseMetaData dBM = null;
-		ResultSet rsColumnMeta=null;
-		try{
-			for(FieldCSVToDb fCTD:mapList){
-				dBM=conToDb.getMetaData();
+		ResultSet rsColumnMeta = null;
+		try {
+			for (FieldCSVToDb fCTD : mapList) {
+				dBM = conToDb.getMetaData();
 				rsColumnMeta = dBM.getColumns(null, null, table, fCTD.getDbField());
-				
+
 				rsColumnMeta.next();
 				int typeOfColumn = rsColumnMeta.getInt(5);
-				
+
 				fCTD.setType(typeOfColumn);
 			}
-			
-//			System.out.println("Verbindung in TypMetaInformation ist Null: " + con==null);
-//			System.out.println("Verbindung in geschlossen: " + con.isClosed());
+
+			// System.out.println("Verbindung in TypMetaInformation ist Null: "
+			// + con==null);
+			// System.out.println("Verbindung in geschlossen: " +
+			// con.isClosed());
 			rsColumnMeta.close();
 			return true;
-		}
-		catch(SQLException e){
+		} catch (SQLException e) {
 			System.out.println("****     " + e.getLocalizedMessage());
 			return false;
 		}
-		
-	
+
 	}
 
 }
