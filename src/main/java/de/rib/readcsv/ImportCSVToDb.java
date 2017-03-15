@@ -209,7 +209,7 @@ public class ImportCSVToDb {
 						for (int i = 0; i < listOfFields.size(); i++) {
 							
 							j++;
-							System.out.println("Wert von j=" + j);
+//							System.out.println("Wert von j=" + j);
 							/*
 							 * if(i==13) System.out.println("i ist gleich 13");
 							 */
@@ -542,7 +542,7 @@ public class ImportCSVToDb {
 						
 						
 						
-						System.out.println("######################## List der zu aktualisierenden Werte ############################");
+//						System.out.println("######################## List der zu aktualisierenden Werte ############################");
 						for (int i = 0; i < updateFields.size(); i++) {
 							
 							j++;
@@ -868,7 +868,7 @@ public class ImportCSVToDb {
 						
 						//System.out.println(prepStatement.getMetaData());
 						prepStatement.addBatch();
-						System.out.println("######################## Ende Schleife ############################");
+//						System.out.println("######################## Ende Schleife ############################");
 
 					}
 
