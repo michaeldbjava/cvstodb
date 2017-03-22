@@ -16,15 +16,20 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+
 public class ImportCSVToDb {
 
 	public static void main(String[] args) {
+		int x=0;
 		String pathOfConfigFile = null;
 		if (args.length == 1) {
 			pathOfConfigFile = args[0];
@@ -42,7 +47,7 @@ public class ImportCSVToDb {
 			configFileExists = Files.exists(path, new LinkOption[] { LinkOption.NOFOLLOW_LINKS });
 
 			// Als erstes wird ein Objekt vom Typ ConfigurationCvsToDB erstellt.
-
+			
 			if (configFileExists == true) {
 				ConfigurationCsvToDB cvsDBConfig = new ConfigurationCsvToDB();
 				System.out.println("********************************************");
@@ -53,9 +58,13 @@ public class ImportCSVToDb {
 				System.out.println("********************************************");
 				System.out.println("********************************************");
 				System.out.println("****    ");
-				System.out.println("****    1. Lese Config Datei: " + pathOfConfigFile);
+				System.out.println("****    "+ ++x + ") Lese Config Datei: " + pathOfConfigFile);
 				System.out.println("****    ");
 				cvsDBConfig.readConfigFile(pathOfConfigFile);
+				Map<String, String> errors = CheckCsvToDBConfigurationInformation.validateInformation(cvsDBConfig);
+				if(errors.size()==0){
+				System.out.println("****    " + ++x + ") Verbindungsaufbau zur Datenbank " + cvsDBConfig.getDatabase());
+				System.out.println("****    ");
 				Connection con = cvsDBConfig.getConnectionToDb();
 				// TODO Auto-generated method stub
 				try {
@@ -69,10 +78,10 @@ public class ImportCSVToDb {
 					ArrayList<FieldCSVToDb> listOfFields = cvsDBConfig.getMapList();
 
 					File file = new File(cvsDBConfig.getCvsfile());
-					System.out.println("****     2. Lese die Zeilen aus der CSV Datei " + file.getName() + " aus!");
+					System.out.println("****    "+ ++x + ") Lese die Zeilen aus der CSV Datei " + file.getName() + " aus!");
 					System.out.println("****     ");
 					System.out.println(
-							"****     3. Als Delimeter (Spaltentrennzeichen) wird folgendes Zeichen verwendet ["
+							"****    " + ++x + ") Als Delimeter (Spaltentrennzeichen) wird folgendes Zeichen verwendet ["
 									+ cvsDBConfig.getDelimeter() + "]");
 					System.out.println("****     ");
 					CSVFormat csvFormat = CSVFormat.newFormat(cvsDBConfig.getDelimeter()).withRecordSeparator("\n")
@@ -90,6 +99,7 @@ public class ImportCSVToDb {
 						primaryKeyList.add(columnNamePK);
 					}
 
+					
 					/* Erzeuge eine Spalten Liste, für die Insert Anweisung */
 					for (int i = 0; i < listOfFields.size(); i++) {
 						FieldCSVToDb fCvsDb = listOfFields.get(i);
@@ -102,6 +112,9 @@ public class ImportCSVToDb {
 						}
 
 					}
+					
+					System.out.println("****    " + ++x + ") Spaltenliste für INSERT Vorgang: " + columnList);
+					System.out.println("****    ");
 
 					/*
 					 * Liste definieren, die ausschließlich Felder aufnimmt, die
@@ -115,6 +128,8 @@ public class ImportCSVToDb {
 							updateFields.add(fCvsDb);
 						}
 					}
+					
+					
 
 					/*
 					 * Zusammensetzen der Wertzuweisungen (=?) der Update
@@ -128,6 +143,8 @@ public class ImportCSVToDb {
 							columnUpdateList = columnUpdateList + "," + fCvsDb2.getDbField() + "=?";
 						}
 					}
+					
+					
 					
 					 ArrayList<FieldEXPRESSIONToDB> listExpressions = cvsDBConfig.getMapListExpressions();
 					
@@ -143,6 +160,9 @@ public class ImportCSVToDb {
 							
 						}
 					}
+					
+					System.out.println("****    " + ++x + ") Wertzuweisunsliste für UPDATE Vorgang (ohne Primärschlüsselspalten): " + columnUpdateList);
+					System.out.println("****    ");
 
 					// columnUpdateList=columnUpdateList.replaceFirst(",", "");
 					
@@ -158,6 +178,10 @@ public class ImportCSVToDb {
 						}
 
 					}
+					
+					
+					System.out.println("****    " + ++x + ") Setze Placeholderlist für Prepared Statements: " + placeholderValues);
+					System.out.println("****    ");
 					/*
 					 * Hier werden die Feld Ausdrücke, die in der
 					 * Konfigurationsdatei angegeben werden, zusammengebaut. Da
@@ -191,11 +215,15 @@ public class ImportCSVToDb {
 
 						}
 					}
+					
+					System.out.println("****    " + ++x + ") Setze Placeholderlist für Prepared Statements: " + placeholderValues);
+					System.out.println("****    ");
 					columnList = columnList + ")";
 					String sqlInstert = "INSERT INTO " + cvsDBConfig.getTable() + " " + columnList + " VALUES ("
 							+ placeholderValues + ") ON DUPLICATE KEY UPDATE " + columnUpdateList;
-					System.out.println("****     4.0 PREPARED STATEMENT wurde formuliert!");
-					System.out.println("****        " + sqlInstert);
+					System.out.println("****    "+ ++x + ") PREPARED STATEMENT wurde formuliert!");
+					System.out.println("****    ");
+					System.out.println("****    "+ ++x + ") Prepared Statement: "  + sqlInstert);
 					java.sql.PreparedStatement prepStatement = con.prepareStatement(sqlInstert);
 
 					// System.out.println("Column List: " + columnList);
@@ -546,7 +574,7 @@ public class ImportCSVToDb {
 						for (int i = 0; i < updateFields.size(); i++) {
 							
 							j++;
-							System.out.println("Wert von j=" + j);
+//							System.out.println("Wert von j=" + j);
 							FieldCSVToDb fCvsDb = updateFields.get(i);
 							int typOfColumn = fCvsDb.getType();
 
@@ -880,48 +908,56 @@ public class ImportCSVToDb {
 
 					con.close();
 					System.out.println(
-							"****     5. Der Import der CSV Datei in die Tabelle wurde erfolgreich ausgeführt!");
+							"****    " + ++x + ") Der Import der CSV Datei in die Tabelle wurde erfolgreich ausgeführt!");
 					System.out.println("****     ");
 
 				} catch (Exception e) {
-					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getLocalizedMessage());
-					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getMessage());
-					System.out.println("****     2. Es ist folgender Fehler aufgetreten: " + e.getCause());
+					System.out.println("****     " + ++x + ") Es ist folgender Fehler aufgetreten: " + e.getLocalizedMessage());
+					System.out.println("****     " + ++x + ") Es ist folgender Fehler aufgetreten: " + e.getMessage());
+					System.out.println("****     " + ++x + ") Es ist folgender Fehler aufgetreten: " + e.getCause());
 					System.out.println("****     ");
 					e.printStackTrace();
 
 					try {
-						System.out.println("****     3. Fuehre einen Rollback durch!");
+						System.out.println("****     " + ++x + ") Fuehre einen Rollback durch!");
 						System.out.println("****     ");
 
 						con.rollback();
-						System.out.println("****     4. Rollback wurde erfolgreich durchgefuehrt!");
+						System.out.println("****     " + ++x + ") Rollback wurde erfolgreich durchgefuehrt!");
 						System.out.println("****     ");
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}
+			}
+				else {
+					Collection<String> errorList = errors.values();
+					Iterator<String> itErrorList = errorList.iterator();
+					while(itErrorList.hasNext()){
+						System.out.println("****    " + ++x + " " + itErrorList.next());
+					}
+				}
 			} else {
 				System.out.println(
-						"****    1) Die angegebene Konfigurationsdatei ist nicht vorhanden.\n****       Bitte geben Sie eine bestehende Konfigurationsdatei an!"
+						"****    " + ++x + ") Die angegebene Konfigurationsdatei ist nicht vorhanden.\n****       Bitte geben Sie eine bestehende Konfigurationsdatei an!"
 								+ "\n****       Uebergeben Sie bitte den Pfad zur Konfigurationsdatei als Parameter!"
 								+ "\n****\n****       Der Aufruf des Programms muss wie folgt erfolgen: "
 								+ "\n****\n****        " + "\n****       java -jar csvtodb.jar csvtodb_config_xxx.xml"
 								+ "\n****\n****        " + "\n****       Lesen Sie bitte die beiligende Dokumentation!"
 								+ "\n****\n****        ");
 
-				System.out.println("****    2) Das Import Programm wird abgebrochen!" + "\n****\n****       ");
+				System.out.println("****    " + ++x + ") Das Import Programm wird abgebrochen!" + "\n****\n****       ");
 			}
 		} else {
 			System.out.println(
-					"****    1) Es wurde keine Konfigurationsdatei angegeben.\n****       Bitte geben Sie eine Konfigurationsdatei an!"
+					"****    " + ++x + ") Es wurde keine Konfigurationsdatei angegeben.\n****       Bitte geben Sie eine Konfigurationsdatei an!"
 							+ "\n****       Uebergeben Sie bitte den Pfad zur Konfigurationsdatei als Parameter!"
 							+ "\n****\n****       Der Aufruf des Programms muss wie folgt erfolgen: "
 							+ "\n****\n****        " + "\n****       java -jar csvtodb.jar csvtodb_config_xxx.xml"
 							+ "\n****\n****        " + "\n****       Lesen Sie bitte die beiligende Dokumentation!"
 							+ "\n****\n****        ");
 
-			System.out.println("****    2) Das Import Programm wird abgebrochen!" + "\n****\n****       ");
+			System.out.println("****    " + ++x + ") Das Import Programm wird abgebrochen!" + "\n****\n****       ");
 
 		}
 		System.out.println("********************************************");

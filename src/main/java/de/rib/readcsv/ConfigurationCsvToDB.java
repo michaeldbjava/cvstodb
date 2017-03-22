@@ -39,6 +39,8 @@ public class ConfigurationCsvToDB {
 	private ArrayList<FieldEXPRESSIONToDB> mapListExpressions = new ArrayList<FieldEXPRESSIONToDB>();
 	private Connection conToDb = null;
 	private Document document = null;
+	
+	private int countPoints = 0;
 
 	public String getCvsfile() {
 		return cvsfile;
@@ -159,74 +161,35 @@ public class ConfigurationCsvToDB {
 			documentBuilder.setErrorHandler(new CsvToDbErrorHandlingConfigFile());
 			document = documentBuilder.parse(xmlFile);
 
-			/*
-			 * Redundanter Code, Methode implementieren, die den redundaten Code
-			 * neutralisiert
-			 */
-			/* Lese Element csvfile */
-			NodeList nodePathCsvFile = document.getElementsByTagName("csvfile");
-			Element elementCsvFile = (Element) nodePathCsvFile.item(0);
-			String pathCSVFile = elementCsvFile.getFirstChild().getTextContent();
-			this.setCvsfile(pathCSVFile);
-
-			/*
-			 * Dieser Versuch redundaten Kode zu eliminieren hat leider nicht
-			 * funktioniert. this.setCvsfile(this.getValueOfXMLNode("cvsfile"));
-			 */
-
-			/* Lese Element convert-cvs-dates-to-iso-date */
-			NodeList nodeDateToIso = document.getElementsByTagName("convert-cvs-dates-to-iso-date");
-			Element elementIsoDate = (Element) nodeDateToIso.item(0);
-			String flagDateToIso = elementIsoDate.getFirstChild().getTextContent();
-			if (flagDateToIso != null) {
-				if (flagDateToIso.equals("true"))
-					this.setDateIsISODate(true);
-				else {
-					this.setDateIsISODate(false);
-				}
-			}
+			
+			
+			
+			this.setCvsfile(getValueOfXMLNode("csvfile"));
 
 			/* Lese Element delimeter */
-			NodeList nodeDelimeterCsvFile = document.getElementsByTagName("delimeter");
-			Element elementDelimeter = (Element) nodeDelimeterCsvFile.item(0);
-			String delimeterCSVFile = elementDelimeter.getFirstChild().getTextContent();
-			this.setDelimeter(delimeterCSVFile.charAt(0));
+			this.setDelimeter(getValueOfXMLNode("delimeter").charAt(0));
 
 			/* Lese Element dbtype */
-			NodeList nodeDbType = document.getElementsByTagName("dbtype");
-			Element elementDbType = (Element) nodeDbType.item(0);
-			this.setDbtype(elementDbType.getFirstChild().getTextContent());
+			this.setDbtype(getValueOfXMLNode("dbtype"));
 
 			/* Lese Element localhost */
-			NodeList nodeLocalhost = document.getElementsByTagName("host");
-			Element elementLocalhost = (Element) nodeLocalhost.item(0);
-			this.setLocalhost(elementLocalhost.getFirstChild().getTextContent());
+			this.setLocalhost(getValueOfXMLNode("host"));
 
 			/* Read DB Name */
-			NodeList nodeDbName = document.getElementsByTagName("database_name");
-			Element elementDbName = (Element) nodeDbName.item(0);
-			this.setDatabase(elementDbName.getFirstChild().getTextContent());
+			this.setDatabase(getValueOfXMLNode("database_name"));
 
 			/* Read Username */
-			NodeList nodeUserDb = document.getElementsByTagName("user");
-			Element elementUserDb = (Element) nodeUserDb.item(0);
-			this.setUser(elementUserDb.getFirstChild().getTextContent());
+			this.setUser(getValueOfXMLNode("user"));
 
 			/* Read Password */
-			NodeList nodeUserPassword = document.getElementsByTagName("password");
-			Element elementUserPassword = (Element) nodeUserPassword.item(0);
-			this.setPassword(elementUserPassword.getFirstChild().getTextContent());
+			this.setPassword(getValueOfXMLNode("password"));
 
 			/* Read DB Port */
-			NodeList nodeDbPort = document.getElementsByTagName("port");
-			Element elementDbPort = (Element) nodeDbPort.item(0);
-			this.setPort(elementDbPort.getFirstChild().getTextContent());
+			this.setPort(getValueOfXMLNode("port"));
 
 			/* Read Table */
 
-			NodeList nodeTable = document.getElementsByTagName("table");
-			Element elementTable = (Element) nodeTable.item(0);
-			this.setTable(elementTable.getFirstChild().getTextContent());
+			this.setTable(getValueOfXMLNode("table"));
 
 			/* Read cvs to db column mappings */
 			// map-csv-fields-to-db
@@ -290,23 +253,8 @@ public class ConfigurationCsvToDB {
 					mapListExpressions.add(fETDB);
 				}
 			}
-
-			System.out.println("****    1.1 Ausgelesener Pfad aus XML Datei: " + this.getCvsfile());
-			System.out.println("****    ");
-			System.out.println("****    1.2 Datenbank aus XML Datei: " + this.getDatabase());
-			System.out.println("****    ");
-			System.out.println("****    1.3 Datenbank Typ aus XML Datei: " + this.getDbtype());
-			System.out.println("****    ");
-			System.out.println("****    1.4 Datenbanknutzer aus XML Datei lesen: " + this.getUser());
-			System.out.println("****    ");
-			System.out.println("****    1.5 Passwort aus XML Datei lesen: " + this.getPassword());
-			System.out.println("****    ");
-			System.out.println("****    1.6 Datenbank Port aus XML Datei lesen: " + this.getPort());
-			System.out.println("****    ");
-			System.out.println("****    1.7 Datenbank Tabelle aus XML Datei lesen: " + this.getTable());
-			System.out.println("****    ");
-			System.out.println("****    ");
-		} catch (IOException ioe) {
+			
+			} catch (IOException ioe) {
 			ioe.printStackTrace();
 		} catch (SAXException se) {
 			se.printStackTrace();
@@ -329,9 +277,9 @@ public class ConfigurationCsvToDB {
 
 			} catch (SQLException ex) {
 				// handle any errors
-				System.out.println("****    SQLException: " + ex.getMessage());
-				System.out.println("****    SQLState: " + ex.getSQLState());
-				System.out.println("****    VendorError: " + ex.getErrorCode());
+				System.out.println("****    " + ++countPoints + "SQLException: " + ex.getMessage());
+				System.out.println("****    " + ++countPoints + "SQLState: " + ex.getSQLState());
+				System.out.println("****    " + ++countPoints + "VendorError: " + ex.getErrorCode());
 			}
 			return conToDb;
 		}
@@ -344,9 +292,9 @@ public class ConfigurationCsvToDB {
 			} catch (SQLException ex) {
 				// handle any errorsint typOfColumn =
 				// tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
-				System.out.println("****    SQLException: " + ex.getMessage());
-				System.out.println("****    SQLState: " + ex.getSQLState());
-				System.out.println("****    VendorError: " + ex.getErrorCode());
+				System.out.println("****    " + ++countPoints + "SQLException: " + ex.getMessage());
+				System.out.println("****    " + ++countPoints + "SQLState: " + ex.getSQLState());
+				System.out.println("****    " + ++countPoints + "VendorError: " + ex.getErrorCode());
 			}
 			return conToDb;
 		}
