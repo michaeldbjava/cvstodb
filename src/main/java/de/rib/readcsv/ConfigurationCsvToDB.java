@@ -224,8 +224,9 @@ public class ConfigurationCsvToDB {
 			}
 			// System.out.println("Ermittle die Datentypen zu den Mapping
 			// Feldern!");
-			getConnectionToDb();
-			getTypeOfFilds();
+//			Connection con = ConnectionFactory.createConnectionToDb(cDbToCvs.getDbtype(), cDbToCvs.getLocalhost(), cDbToCvs.getPort(), cDbToCvs.getDatabase(), cDbToCvs.getUser(), cDbToCvs.getPassword());
+			conToDb=ConnectionFactory.createConnectionToDb(this.dbtype, this.localhost, this.port, this.database, this.user,this.password);
+			MetaDataProvider.addColumnTypeToFieldList(mapList, table, conToDb);
 			/*
 			 * <map-calculated-fields-to-db> <calculated-value-mapping>
 			 * <expression>now()</expression>
@@ -266,73 +267,7 @@ public class ConfigurationCsvToDB {
 
 	}
 
-	public Connection getConnectionToDb() {
-		/* Auch hier redundaten Kode neutralisieren */
-		if (this.getDbtype().equals("mysql")) {
-
-			try {
-				conToDb = DriverManager.getConnection("jdbc:mysql://" + this.localhost + ":" + this.getPort() + "/"
-						+ this.getDatabase() + "?" + "user=" + this.getUser() + "&password=" + this.getPassword()
-						+ "&rewriteBatchedStatements=true");
-
-			} catch (SQLException ex) {
-				// handle any errors
-				System.out.println("****    " + ++countPoints + "SQLException: " + ex.getMessage());
-				System.out.println("****    " + ++countPoints + "SQLState: " + ex.getSQLState());
-				System.out.println("****    " + ++countPoints + "VendorError: " + ex.getErrorCode());
-			}
-			return conToDb;
-		}
-
-		if (this.getDbtype().equals("sqlite")) {
-
-			try {
-				conToDb = DriverManager.getConnection("jdbc:sqlite://" + this.getDatabase());
-
-			} catch (SQLException ex) {
-				// handle any errorsint typOfColumn =
-				// tMI.getTyp(cvsDBConfig.getTable(), fCvsDb.getDbField(), con);
-				System.out.println("****    " + ++countPoints + "SQLException: " + ex.getMessage());
-				System.out.println("****    " + ++countPoints + "SQLState: " + ex.getSQLState());
-				System.out.println("****    " + ++countPoints + "VendorError: " + ex.getErrorCode());
-			}
-			return conToDb;
-		}
-		
-		if(this.getDbtype().equals("postgresql")){
-			try {
-				conToDb = DriverManager.getConnection("jdbc:postgresql://" + this.getLocalhost() + ":" + this.getPort() +"/" + this.getDatabase(),this.getUser(),this.getPassword());
-
-			} catch (SQLException ex) {
-				// handle any errors
-				System.out.println("****    SQLException: " + ex.getMessage());
-				System.out.println("****    SQLState: " + ex.getSQLState());
-				System.out.println("****    VendorError: " + ex.getErrorCode());
-			}
-			return conToDb;
-
-		}
-		
-		
-		if(this.getDbtype().equals("mssqlserver")){
-			try {
-				conToDb = DriverManager.getConnection("jdbc:sqlserver://" + this.getLocalhost() + ":" + this.getPort() + ";databaseName=" 
-						+ this.getDatabase() + ";user=" + this.getUser() + ";password=" + this.getPassword() + ";");
-
-			} catch (SQLException ex) {
-				// handle any errors
-				System.out.println("****    SQLException: " + ex.getMessage());
-				System.out.println("****    SQLState: " + ex.getSQLState());
-				System.out.println("****    VendorError: " + ex.getErrorCode());
-			}
-			return conToDb;
-
-		}
-
-		return null;
-
-	}
-
+	
 	private String getValueOfXMLNode(String xmlNode) {
 		String xmlNodeValue = xmlNode;
 		/* Die Methode funktioniert noch nicht */
@@ -343,7 +278,7 @@ public class ConfigurationCsvToDB {
 		return valueOfElement;
 	}
 
-	private boolean getTypeOfFilds() {
+	/*private boolean getTypeOfFilds() {
 		DatabaseMetaData dBM = null;
 		ResultSet rsColumnMeta = null;
 		try {
@@ -357,10 +292,6 @@ public class ConfigurationCsvToDB {
 				fCTD.setType(typeOfColumn);
 			}
 
-			// System.out.println("Verbindung in TypMetaInformation ist Null: "
-			// + con==null);
-			// System.out.println("Verbindung in geschlossen: " +
-			// con.isClosed());
 			rsColumnMeta.close();
 			return true;
 		} catch (SQLException e) {
@@ -368,6 +299,6 @@ public class ConfigurationCsvToDB {
 			return false;
 		}
 
-	}
+	}*/
 
 }

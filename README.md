@@ -8,3 +8,12 @@ Future Request could be:
 + It should be possible to configure output to standard output or an output file
 
 Many thanks to the Apache Commons CSV project. Its a great library. This liddle project could not be possible in that easy war. 
+
+#Dependencies#
+##To use this export program, you need following external JARS:##
+1. Apache Commons CSV
+2. JDBC JAR File of Database to export data
+
+#Actual Work#
+##Separete get column meta data information in class MetaDataProvider.##
+It must be out of Class ConfigurationCsvToDB. To write some good JUnit Tests it is better to separete some things. 

@@ -26,6 +26,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 
+
 public class ImportCSVToDb {
 
 	public static void main(String[] args) {
@@ -65,7 +66,8 @@ public class ImportCSVToDb {
 				if(errors.size()==0){
 				System.out.println("****    " + ++x + ") Verbindungsaufbau zur Datenbank " + cvsDBConfig.getDatabase());
 				System.out.println("****    ");
-				Connection con = cvsDBConfig.getConnectionToDb();
+				//conToDb=ConnectionFactory.createConnectionToDb(this.dbtype, this.localhost, this.port, this.database, this.user,this.password);
+				Connection con = ConnectionFactory.createConnectionToDb(cvsDBConfig.getDbtype(), cvsDBConfig.getLocalhost(), cvsDBConfig.getPort(), cvsDBConfig.getDatabase(),cvsDBConfig.getUser(), cvsDBConfig.getPassword());
 				// TODO Auto-generated method stub
 				try {
 					// Example CVS File must be places in project dircetory
